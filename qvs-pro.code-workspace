@@ -1,0 +1,39 @@
+{
+  "folders": [
+    {
+      "name": "QVS-Pro",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "files.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/node_modules": true,
+      "**/__pycache__": true,
+      "**/*.pyc": true
+    },
+    "[python]": {
+      "editor.tabSize": 4,
+      "editor.formatOnSave": true
+    },
+    "[go]": {
+      "editor.tabSize": 4,
+      "editor.formatOnSave": true
+    },
+    "go.lintTool": "golangci-lint",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true
+  },
+  "extensions": {
+    "recommendations": [
+      "golang.go",
+      "ms-python.python",
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "ms-azuretools.vscode-docker"
+    ]
+  }
+}

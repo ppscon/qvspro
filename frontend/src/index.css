@@ -1,0 +1,257 @@
+/* Tailwind CSS Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-display: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  body {
+    @apply font-inter text-gray-900 bg-white transition-colors duration-300;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .dark body {
+    @apply text-gray-100 bg-gray-900;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-space-grotesk font-semibold;
+  }
+}
+
+@layer components {
+  .scan-button {
+    @apply bg-primary text-white hover:bg-primary/90 font-medium rounded-lg 
+           transition-all duration-200 ease-in-out transform hover:scale-105 
+           active:scale-95 flex items-center justify-center gap-2 px-6 py-3;
+  }
+  
+  .quantum-card {
+    @apply relative overflow-hidden bg-white dark:bg-gray-900 rounded-xl shadow-lg 
+           border border-gray-200 dark:border-gray-800 transition-all duration-300
+           hover:shadow-xl hover:border-primary/50 dark:hover:border-quantum-400/50;
+  }
+  
+  .quantum-gradient {
+    @apply bg-gradient-to-br from-primary/80 via-quantum-500/80 to-quantum-700/80 
+           text-white;
+  }
+  
+  .hero-section {
+    @apply relative overflow-hidden pb-20 pt-16;
+  }
+  
+  .hero-bg {
+    @apply absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 
+           dark:from-gray-900 dark:to-gray-800 -z-10;
+  }
+  
+  .hero-glow {
+    @apply absolute -top-40 -left-40 w-96 h-96 bg-primary/30 dark:bg-quantum-500/20 
+           rounded-full filter blur-3xl opacity-30 dark:opacity-40 animate-pulse-slow;
+  }
+  
+  .quantum-glow {
+    @apply absolute -bottom-40 -right-40 w-96 h-96 bg-quantum-700/30 dark:bg-primary/20 
+           rounded-full filter blur-3xl opacity-30 dark:opacity-40 animate-pulse-slow;
+  }
+  
+  .file-drop-area {
+    @apply relative border-2 border-dashed border-gray-300 dark:border-gray-700 
+           rounded-xl p-8 transition-all duration-200 bg-gray-50 dark:bg-gray-800/50
+           hover:border-primary dark:hover:border-quantum-500 cursor-pointer
+           hover:bg-gray-100/50 dark:hover:bg-gray-800/80;
+  }
+  
+  .toggle-button {
+    @apply relative inline-flex items-center justify-center rounded-md p-2 
+           text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800
+           focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+           dark:focus:ring-offset-gray-900 transition-colors duration-200;
+  }
+  
+  .vulnerability-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-block;
+  }
+  
+  .vulnerability-badge-high {
+    background-color: #ef4444;
+    color: white;
+  }
+  
+  .dark .vulnerability-badge-high {
+    background-color: #b91c1c;
+    color: #fecaca;
+  }
+  
+  .vulnerability-badge-medium {
+    background-color: #f59e0b;
+    color: white;
+  }
+  
+  .dark .vulnerability-badge-medium {
+    background-color: #d97706;
+    color: #fef3c7;
+  }
+  
+  .vulnerability-badge-low {
+    background-color: #10b981;
+    color: white;
+  }
+  
+  .dark .vulnerability-badge-low {
+    background-color: #047857;
+    color: #d1fae5;
+  }
+  
+  .results-container {
+    @apply mt-8 grid gap-6 animate-fade-in;
+  }
+  
+  .code-block {
+    @apply p-4 rounded-lg bg-gray-50 dark:bg-gray-800 border 
+           border-gray-200 dark:border-gray-700 overflow-x-auto text-sm
+           font-mono;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 4s ease-in-out infinite;
+}
+
+/* Custom animations for quantum effects */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes quantum-float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.quantum-float {
+  animation: quantum-float 4s ease-in-out infinite;
+}
+
+/* Gradient text animations */
+.animate-gradient-text {
+  background-size: 200% 200%;
+  animation: gradient-animation 5s ease infinite;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Enhanced scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Timeline event animations */
+.timeline-event {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.7s ease-out;
+}
+
+.timeline-event.animate {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive hero image adjustments */
+@media (max-width: 640px) {
+  .hero-container {
+    min-height: 50vh;
+  }
+}
+
+/* Custom focus styles for better accessibility */
+button:focus, a:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+.dark button:focus, .dark a:focus {
+  outline: 2px solid rgba(96, 165, 250, 0.5);
+}
+
+/* Additional utility classes */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.text-shadow-lg {
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.dark .text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dark .text-shadow-lg {
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
+}

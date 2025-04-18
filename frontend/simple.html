@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QVS-Pro: Quantum Vulnerability Scanner</title>
+  <style>
+    /* Direct CSS styles with no external dependencies */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    @font-face {
+      font-family: 'Inter';
+      src: local('Inter'), url('https://fonts.gstatic.com/s/inter/v12/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2') format('woff2');
+      font-weight: 400;
+      font-display: swap;
+    }
+    
+    @font-face {
+      font-family: 'Space Grotesk';
+      src: local('Space Grotesk'), url('https://fonts.gstatic.com/s/spacegrotesk/v13/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj7oUXskPMBBSSJLm2E.woff2') format('woff2');
+      font-weight: 600;
+      font-display: swap;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f9fafb;
+      color: #111827;
+      line-height: 1.5;
+    }
+    
+    .app {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    header {
+      background-color: white;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 1rem 0;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    .flex {
+      display: flex;
+    }
+    
+    .items-center {
+      align-items: center;
+    }
+    
+    .justify-between {
+      justify-content: space-between;
+    }
+    
+    .justify-center {
+      justify-content: center;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-family: -apple-system, BlinkMacSystemFont, 'Space Grotesk', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    
+    .logo {
+      height: 40px;
+      margin-right: 0.75rem;
+    }
+    
+    .nav-link {
+      padding: 0.5rem 1rem;
+      color: #4b5563;
+      border-radius: 0.375rem;
+      transition: background-color 0.2s;
+    }
+    
+    .nav-link:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .main {
+      flex: 1;
+      padding: 2rem 0;
+    }
+    
+    .section {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .heading {
+      font-size: 1.875rem;
+    }
+    
+    .subheading {
+      color: #6b7280;
+      margin-bottom: 2rem;
+    }
+    
+    .btn {
+      background-color: #2563eb;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-weight: 500;
+      margin-top: 1rem;
+      transition: background-color 0.2s;
+    }
+    
+    .btn:hover {
+      background-color: #1d4ed8;
+    }
+    
+    .footer {
+      background-color: #f3f4f6;
+      color: #6b7280;
+      padding: 1.5rem 0;
+      margin-top: auto;
+      text-align: center;
+    }
+    
+    .space-x-4 > * + * {
+      margin-left: 1rem;
+    }
+    
+    .mb-2 {
+      margin-bottom: 0.5rem;
+    }
+    
+    .mt-4 {
+      margin-top: 1rem;
+    }
+    
+    /* Styling for sun icon */
+    .sun-icon {
+      width: 20px;
+      height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="container flex items-center justify-between">
+        <h1 class="flex items-center">
+          <img src="/images/logo-qvs.png" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMTZDMTQuMjA5MSAxNiAxNiAxNC4yMDkxIDE2IDEyQzE2IDkuNzkwODYgMTQuMjA5MSA4IDEyIDhDOS43OTA4NiA4IDggOS43OTA4NiA4IDEyQzggMTQuMjA5MSA5Ljc5MDg2IDE2IDEyIDE2WiIgZmlsbD0iIzNCODJGNiIvPjxwYXRoIGQ9Ik0xMiAyQzEyLjU1MjMgMiAxMyAyLjQ0NzcyIDEzIDNWNEMxMyA0LjU1MjI4IDEyLjU1MjMgNSAxMiA1QzExLjQ0NzcgNSAxMSA0LjU1MjI4IDExIDRWM0MxMSAyLjQ0NzcyIDExLjQ0NzcgMiAxMiAyWiIgZmlsbD0iIzhCNUNGNiIvPjxwYXRoIGQ9Ik0xMiAxOUMxMi41NTIzIDE5IDEzIDE5LjQ0NzcgMTMgMjBWMjFDMTMgMjEuNTUyMyAxMi41NTIzIDIyIDEyIDIyQzExLjQ0NzcgMjIgMTEgMjEuNTUyMyAxMSAyMVYyMEMxMSAxOS40NDc3IDExLjQ0NzcgMTkgMTIgMTlaIiBmaWxsPSIjOEI1Q0Y2Ii8+PHBhdGggZD0iTTIxIDEyQzIxLjU1MjMgMTIgMjIgMTIuNDQ3NyAyMiAxM0MyMiAxMy41NTIzIDIxLjU1MjMgMTQgMjEgMTRIMjBDMTkuNDQ3NyAxNCAxOSAxMy41NTIzIDE5IDEzQzE5IDEyLjQ0NzcgMTkuNDQ3NyAxMiAyMCAxMkgyMVoiIGZpbGw9IiM4QjVDRjYiLz48cGF0aCBkPSJNNSAxMkM1LjU1MjI4IDEyIDYgMTIuNDQ3NyA2IDEzQzYgMTMuNTUyMyA1LjU1MjI4IDE0IDUgMTRINEM0IDE0IDMgMTQgMyAxM0MzIDEyIDQgMTIgNCAxMkg1WiIgZmlsbD0iIzhCNUNGNiIvPjxwYXRoIGQ9Ik0xNy42NSA3Ljc1OEMxOC4wNDYxIDcuNDEyMTggMTguNjU1MyA3LjQ1MzE3IDE5LjAwMTEgNy44NDkyOEMxOS4zNDY5IDguMjQ1MzkgMTkuMzA2IDguODU0NTcgMTguOTA5OSA5LjIwMDM2TDE4LjA2NDMgMTBDMTcuNjY4MiAxMC4zNDU4IDE3LjA1OSAxMC4zMDQ4IDE2LjcxMzIgOS45MDg2OEMxNi4zNjczIDkuNTEyNTcgMTYuNDA4MyA4LjkwMzM5IDE2LjgwNDQgOC41NTc2MUwxNy42NSA3Ljc1OFoiIGZpbGw9IiM4QjVDRjYiLz48cGF0aCBkPSJNNy4yMDAxIDE2LjA5OTZDNy41OTYyMSAxNS43NTM4IDguMjA1MzkgMTUuNzk0OCA4LjU1MTE4IDE2LjE5MDlDOC44OTY5NiAxNi41ODcgOC44NTU5NyAxNy4xOTYyIDguNDU5ODYgMTcuNTQyTDcuNjE0MzEgMTguMzQxNkM3LjIxODIgMTguNjg3NCA2LjYwOTAyIDE4LjY0NjQgNi4yNjMyNCAxOC4yNTAzQzUuOTE3NDUgMTcuODU0MiA1Ljk1ODQ0IDE3LjI0NSA2LjM1NDU1IDE2Ljg5OTJMNy4yMDAxIDE2LjA5OTZaIiBmaWxsPSIjOEI1Q0Y2Ii8+PHBhdGggZD0iTTE4LjA2NDEgMTRDMTguNDYwMiAxMy42NTQyIDE5LjA2OTQgMTMuNjk1MiAxOS40MTUyIDE0LjA5MTNDMTkuNzYxIDE0LjQ4NzQgMTkuNzIgMTUuMDk2NiAxOS4zMjM5IDE1LjQ0MjNMMTguNDc4MyAxNi4yNDJDMTguMDgyMiAxNi41ODc3IDE3LjQ3MyAxNi41NDY4IDE3LjEyNzIgMTYuMTUwN0MxNi43ODE0IDE1Ljc1NDYgMTYuODIyNCAxNS4xNDU0IDE3LjIxODUgMTQuNzk5NkwxOC4wNjQxIDE0WiIgZmlsbD0iIzhCNUNGNiIvPjxwYXRoIGQ9Ik03LjE5OTg4IDcuOTAwMzJDNy41OTU5OSA4LjI0NjEgNy41NTUgOC44NTUyOCA3LjIwOTIxIDkuMjUxMzlDNi44NjM0MyA5LjY0NzUgNi4yNTQyNSA5LjYwNjUxIDUuODU4MTQgOS4yNjA3M0w1LjAxMjU5IDguNDYxMDhDNC42MTY0OCA4LjExNTMgNC42NTc0NyA3LjUwNjEyIDUuMDAzMjUgNy4xMTAwMUM1LjM0OTA0IDYuNzEzOSA1Ljk1ODIyIDYuNzU0ODkgNi4zNTQzMyA3LjEwMDY3TDcuMTk5ODggNy45MDAzMloiIGZpbGw9IiM4QjVDRjYiLz48L3N2Zz4='" alt="QVS-Pro Logo" class="logo">
+          <span class="nav-link">QVS-Pro</span>
+        </h1>
+        
+        <div class="flex items-center">
+          <a href="#" class="nav-link">Home</a>
+          <a href="#" class="nav-link">Scanner</a>
+          <button id="theme-toggle" class="btn" style="background-color: #e5e7eb; color: #1d4ed8; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0;">
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="container">
+        <div class="mb-2">
+          <h2 class="heading">Quantum Vulnerability Scanner</h2>
+          <p class="subheading">
+            Scan your codebase for cryptographic algorithms vulnerable to quantum computing attacks
+          </p>
+        </div>
+
+        <div class="section">
+          <p style="font-size: 1.125rem;">This is a simplified version of the scanner interface for testing styles.</p>
+          <button class="btn">Test Button</button>
+        </div>
+      </div>
+    </main>
+    
+    <footer class="footer">
+      <div class="container">
+        <div class="flex justify-center items-center mb-2">
+          <img src="/images/logo-qvs.png" onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAiIGhlaWdodD0iMzAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMTZDMTQuMjA5MSAxNiAxNiAxNC4yMDkxIDE2IDEyQzE2IDkuNzkwODYgMTQuMjA5MSA4IDEyIDhDOS43OTA4NiA4IDggOS43OTA4NiA4IDEyQzggMTQuMjA5MSA5Ljc5MDg2IDE2IDEyIDE2WiIgZmlsbD0iIzNCODJGNiIvPjxwYXRoIGQ9Ik0xMiAyQzEyLjU1MjMgMiAxMyAyLjQ0NzcyIDEzIDNWNEMxMyA0LjU1MjI4IDEyLjU1MjMgNSAxMiA1QzExLjQ0NzcgNSAxMSA0LjU1MjI4IDExIDRWM0MxMSAyLjQ0NzcyIDExLjQ0NzcgMiAxMiAyWiIgZmlsbD0iIzhCNUNGNiIvPjxwYXRoIGQ9Ik0xMiAxOUMxMi41NTIzIDE5IDEzIDE5LjQ0NzcgMTMgMjBWMjFDMTMgMjEuNTUyMyAxMi41NTIzIDIyIDEyIDIyQzExLjQ0NzcgMjIgMTEgMjEuNTUyMyAxMSAyMVYyMEMxMSAxOS40NDc3IDExLjQ0NzcgMTkgMTIgMTlaIiBmaWxsPSIjOEI1Q0Y2Ii8+PHBhdGggZD0iTTIxIDEyQzIxLjU1MjMgMTIgMjIgMTIuNDQ3NyAyMiAxM0MyMiAxMy41NTIzIDIxLjU1MjMgMTQgMjEgMTRIMjBDMTkuNDQ3NyAxNCAxOSAxMy41NTIzIDE5IDEzQzE5IDEyLjQ0NzcgMTkuNDQ3NyAxMiAyMCAxMkgyMVoiIGZpbGw9IiM4QjVDRjYiLz48cGF0aCBkPSJNNSAxMkM1LjU1MjI4IDEyIDYgMTIuNDQ3NyA2IDEzQzYgMTMuNTUyMyA1LjU1MjI4IDE0IDUgMTRINEM0IDE0IDMgMTQgMyAxM0MzIDEyIDQgMTIgNCAxMkg1WiIgZmlsbD0iIzhCNUNGNiIvPjxwYXRoIGQ9Ik0xNy42NSA3Ljc1OEMxOC4wNDYxIDcuNDEyMTggMTguNjU1MyA3LjQ1MzE3IDE5LjAwMTEgNy44NDkyOEMxOS4zNDY5IDguMjQ1MzkgMTkuMzA2IDguODU0NTcgMTguOTA5OSA5LjIwMDM2TDE4LjA2NDMgMTBDMTcuNjY4MiAxMC4zNDU4IDE3LjA1OSAxMC4zMDQ4IDE2LjcxMzIgOS45MDg2OEMxNi4zNjczIDkuNTEyNTcgMTYuNDA4MyA4LjkwMzM5IDE2LjgwNDQgOC41NTc2MUwxNy42NSA3Ljc1OFoiIGZpbGw9IiM4QjVDRjYiLz48cGF0aCBkPSJNNy4yMDAxIDE2LjA5OTZDNy41OTYyMSAxNS43NTM4IDguMjA1MzkgMTUuNzk0OCA4LjU1MTE4IDE2LjE5MDlDOC44OTY5NiAxNi41ODcgOC44NTU5NyAxNy4xOTYyIDguNDU5ODYgMTcuNTQyTDcuNjE0MzEgMTguMzQxNkM3LjIxODIgMTguNjg3NCA2LjYwOTAyIDE4LjY0NjQgNi4yNjMyNCAxOC4yNTAzQzUuOTE3NDUgMTcuODU0MiA1Ljk1ODQ0IDE3LjI0NSA2LjM1NDU1IDE2Ljg5OTJMNy4yMDAxIDE2LjA5OTZaIiBmaWxsPSIjOEI1Q0Y2Ii8+PHBhdGggZD0iTTE4LjA2NDEgMTRDMTguNDYwMiAxMy42NTQyIDE5LjA2OTQgMTMuNjk1MiAxOS40MTUyIDE0LjA5MTNDMTkuNzYxIDE0LjQ4NzQgMTkuNzIgMTUuMDk2NiAxOS4zMjM5IDE1LjQ0MjNMMTguNDc4MyAxNi4yNDJDMTguMDgyMiAxNi41ODc3IDE3LjQ3MyAxNi41NDY4IDE3LjEyNzIgMTYuMTUwN0MxNi43ODE0IDE1Ljc1NDYgMTYuODIyNCAxNS4xNDU0IDE3LjIxODUgMTQuNzk5NkwxOC4wNjQxIDE0WiIgZmlsbD0iIzhCNUNGNiIvPjxwYXRoIGQ9Ik03LjE5OTg4IDcuOTAwMzJDNy41OTU5OSA4LjI0NjEgNy41NTUgOC44NTUyOCA3LjIwOTIxIDkuMjUxMzlDNi44NjM0MyA5LjY0NzUgNi4yNTQyNSA5LjYwNjUxIDUuODU4MTQgOS4yNjA3M0w1LjAxMjU5IDguNDYxMDhDNC42MTY0OCA4LjExNTMgNC42NTc0NyA3LjUwNjEyIDUuMDAzMjUgNy4xMTAwMUM1LjM0OTA0IDYuNzEzOSA1Ljk1ODIyIDYuNzU0ODkgNi4zNTQzMyA3LjEwMDY3TDcuMTk5ODggNy45MDAzMloiIGZpbGw9IiM4QjVDRjYiLz48L3N2Zz4='" alt="QVS-Pro Logo" style="height: 30px; margin-right: 0.5rem;">
+          <span class="heading" style="font-size: 1.5rem;">QVS-Pro</span>
+        </div>
+        <p>Quantum Vulnerability Scanner Pro &copy; 2025</p>
+        <p class="mt-4">Scan your code for quantum-vulnerable cryptographic algorithms</p>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Simple toggle for dark mode with immediate CSS changes
+    const themeToggle = document.getElementById('theme-toggle');
+    const sunIcon = document.querySelector('.sun-icon');
+    
+    // Initialize theme based on system preference
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.body.classList.add('dark-mode');
+      updateDarkMode(true);
+    }
+    
+    themeToggle.addEventListener('click', () => {
+      const isDarkMode = document.body.classList.toggle('dark-mode');
+      updateDarkMode(isDarkMode);
+    });
+    
+    function updateDarkMode(isDark) {
+      if (isDark) {
+        document.body.style.backgroundColor = '#111827';
+        document.body.style.color = '#f9fafb';
+        themeToggle.style.backgroundColor = '#374151';
+        themeToggle.style.color = '#fbbf24';
+        document.querySelectorAll('header')[0].style.backgroundColor = '#1f2937';
+        document.querySelectorAll('.nav-link').forEach(el => {
+          el.style.color = '#d1d5db';
+        });
+        document.querySelectorAll('.section').forEach(el => {
+          el.style.backgroundColor = '#1f2937';
+        });
+        document.querySelectorAll('.subheading').forEach(el => {
+          el.style.color = '#9ca3af';
+        });
+        document.querySelectorAll('.footer').forEach(el => {
+          el.style.backgroundColor = '#1f2937';
+          el.style.color = '#9ca3af';
+        });
+      } else {
+        document.body.style.backgroundColor = '#f9fafb';
+        document.body.style.color = '#111827';
+        themeToggle.style.backgroundColor = '#e5e7eb';
+        themeToggle.style.color = '#1d4ed8';
+        document.querySelectorAll('header')[0].style.backgroundColor = 'white';
+        document.querySelectorAll('.nav-link').forEach(el => {
+          el.style.color = '#4b5563';
+        });
+        document.querySelectorAll('.section').forEach(el => {
+          el.style.backgroundColor = 'white';
+        });
+        document.querySelectorAll('.subheading').forEach(el => {
+          el.style.color = '#6b7280';
+        });
+        document.querySelectorAll('.footer').forEach(el => {
+          el.style.backgroundColor = '#f3f4f6';
+          el.style.color = '#6b7280';
+        });
+      }
+    }
+  </script>
+</body>
+</html> 

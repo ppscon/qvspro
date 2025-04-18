@@ -1,0 +1,175 @@
+/* Essential styles without Tailwind dependencies */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f9fafb;
+  color: #111827;
+}
+
+.dark body {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.header {
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1rem 0;
+}
+
+.dark .header {
+  background-color: #1f2937;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.logo-qvs {
+  height: 40px;
+  width: auto;
+  margin-right: 0.75rem;
+}
+
+.logo-qvs-footer {
+  height: 30px;
+  width: auto;
+  margin-right: 0.5rem;
+}
+
+.nav-link {
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  color: #4b5563;
+  border-radius: 0.375rem;
+  transition: background-color 0.2s;
+}
+
+.nav-link:hover {
+  background-color: #f3f4f6;
+}
+
+.dark .nav-link {
+  color: #d1d5db;
+}
+
+.dark .nav-link:hover {
+  background-color: #374151;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn-theme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background-color: #e5e7eb;
+  color: #1d4ed8;
+}
+
+.dark .btn-theme {
+  background-color: #374151;
+  color: #fbbf24;
+}
+
+.main {
+  padding: 2rem 0;
+}
+
+.section {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.dark .section {
+  background-color: #1f2937;
+}
+
+.heading {
+  font-size: 1.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.subheading {
+  color: #6b7280;
+  margin-bottom: 2rem;
+}
+
+.dark .subheading {
+  color: #9ca3af;
+}
+
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.footer {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  padding: 1.5rem 0;
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.dark .footer {
+  background-color: #1f2937;
+  color: #9ca3af;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.space-x-4 > * + * {
+  margin-left: 1rem;
+} 
