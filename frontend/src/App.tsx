@@ -337,11 +337,102 @@ const ScannerApp: React.FC = () => {
               <h3 className="text-xl font-semibold mb-4">Scan Results</h3>
               
               {scanResults.results && scanResults.results.length > 0 ? (
-                <div className="space-y-4">
-                  <p className="flex items-center text-amber-600 dark:text-amber-400">
-                    <FiAlertTriangle className="mr-2" />
-                    Found {scanResults.vulnerabilities_count || scanResults.results.length} potential vulnerabilities
-                  </p>
+                <div className="space-y-6">
+                  {/* Vulnerability summary */}
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center text-amber-600 dark:text-amber-400">
+                      <FiAlertTriangle className="mr-2" />
+                      Found {scanResults.vulnerabilities_count || scanResults.results.length} potential vulnerabilities
+                    </p>
+                    
+                    {/* Risk distribution chart */}
+                    <div className="flex items-center space-x-2">
+                      {(() => {
+                        const highCount = scanResults.results.filter((v: any) => 
+                          (v.risk || '').toLowerCase() === 'high').length;
+                        const mediumCount = scanResults.results.filter((v: any) => 
+                          (v.risk || '').toLowerCase() === 'medium').length;
+                        const lowCount = scanResults.results.filter((v: any) => 
+                          (v.risk || '').toLowerCase() === 'low').length;
+                          
+                        return (
+                          <>
+                            <div className="flex flex-col items-center">
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
+                                <span className="text-xs font-medium">{highCount} High</span>
+                              </div>
+                              <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1">
+                                <div 
+                                  className="h-full bg-red-500" 
+                                  style={{ width: `${(highCount / scanResults.results.length) * 100}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-col items-center">
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 rounded-full bg-amber-500 mr-1"></div>
+                                <span className="text-xs font-medium">{mediumCount} Medium</span>
+                              </div>
+                              <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1">
+                                <div 
+                                  className="h-full bg-amber-500" 
+                                  style={{ width: `${(mediumCount / scanResults.results.length) * 100}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex flex-col items-center">
+                              <div className="flex items-center">
+                                <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
+                                <span className="text-xs font-medium">{lowCount} Low</span>
+                              </div>
+                              <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1">
+                                <div 
+                                  className="h-full bg-green-500" 
+                                  style={{ width: `${(lowCount / scanResults.results.length) * 100}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  
+                  {/* Algorithm type summary */}
+                  <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium mb-2">Vulnerability Types</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {(() => {
+                        // Get unique vulnerability types with proper typing
+                        const vulnTypes: string[] = Array.from(new Set(scanResults.results.map((v: any) => 
+                          v.vulnerability_type || (
+                            ((v.type || '').toLowerCase() === 'publickey' || (v.algorithm || '').toLowerCase().includes('rsa') || (v.algorithm || '').toLowerCase().includes('ecc')) 
+                              ? "Shor's Algorithm" 
+                              : "Grover's Algorithm"
+                          )
+                        )));
+                        
+                        return vulnTypes.map((type: string, i: number) => {
+                          const count = scanResults.results.filter((v: any) => 
+                            v.vulnerability_type === type || 
+                            (!v.vulnerability_type && type === "Shor's Algorithm" && 
+                              ((v.type || '').toLowerCase() === 'publickey' || (v.algorithm || '').toLowerCase().includes('rsa') || (v.algorithm || '').toLowerCase().includes('ecc'))) ||
+                            (!v.vulnerability_type && type === "Grover's Algorithm" && 
+                              !((v.type || '').toLowerCase() === 'publickey' || (v.algorithm || '').toLowerCase().includes('rsa') || (v.algorithm || '').toLowerCase().includes('ecc')))
+                          ).length;
+                          
+                          return (
+                            <div key={i} className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
+                              {type} ({count})
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
                   
                   <div className="overflow-auto">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -350,59 +441,111 @@ const ScannerApp: React.FC = () => {
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">File</th>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Algorithm</th>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Risk Level</th>
+                          <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Vulnerability Type</th>
                           <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Line</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-800">
                         {scanResults.results.map((vuln: any, index: number) => (
-                          <tr key={index}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">{vuln.file_path || vuln.file}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{vuln.algorithm_name || vuln.algorithm}</td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              {(() => {
-                                // Debug each vulnerability object
-                                const risk = vuln.risk || vuln.risk_level || vuln.severity || 'unknown';
-                                const isHigh = risk.toLowerCase() === 'high';
-                                const isMedium = risk.toLowerCase() === 'medium';
-                                const isLow = !isHigh && !isMedium;
-                                
-                                // Direct inline styles based on risk level - more elegant with transparency
-                                const badgeStyle = {
-                                  display: 'inline-block',
-                                  padding: '0.25rem 0.75rem',
-                                  borderRadius: '9999px',
-                                  fontSize: '0.75rem',
-                                  fontWeight: '500',
-                                  border: '1px solid',
-                                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                                  ...(isHigh
-                                    ? {
-                                        color: darkMode ? '#ef4444' : '#b91c1c',
-                                        backgroundColor: darkMode ? 'rgba(239, 68, 68, 0.15)' : 'rgba(254, 226, 226, 0.8)',
-                                        borderColor: darkMode ? 'rgba(239, 68, 68, 0.3)' : 'rgba(248, 113, 113, 0.3)'
-                                      }
-                                    : isMedium
-                                    ? {
-                                        color: darkMode ? '#f59e0b' : '#92400e',
-                                        backgroundColor: darkMode ? 'rgba(245, 158, 11, 0.15)' : 'rgba(254, 243, 199, 0.8)',
-                                        borderColor: darkMode ? 'rgba(245, 158, 11, 0.3)' : 'rgba(251, 191, 36, 0.3)'
-                                      }
-                                    : {
-                                        color: darkMode ? '#10b981' : '#065f46',
-                                        backgroundColor: darkMode ? 'rgba(16, 185, 129, 0.15)' : 'rgba(209, 250, 229, 0.8)',
-                                        borderColor: darkMode ? 'rgba(16, 185, 129, 0.3)' : 'rgba(52, 211, 153, 0.3)'
-                                      })
-                                };
-                                
-                                return (
-                                  <span style={badgeStyle}>
-                                    {risk}
-                                  </span>
-                                );
-                              })()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{vuln.line_number || vuln.line}</td>
-                          </tr>
+                          <>
+                            <tr key={`vuln-${index}`} className="group hover:bg-gray-50 dark:hover:bg-gray-800/70 cursor-pointer" 
+                                onClick={() => {
+                                  // Toggle expanded details
+                                  const expandedDetails = document.getElementById(`details-${index}`);
+                                  if (expandedDetails) {
+                                    expandedDetails.classList.toggle('hidden');
+                                  }
+                                }}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
+                                {vuln.file_path || vuln.file}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                {vuln.algorithm_name || vuln.algorithm}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {(() => {
+                                  const risk = vuln.risk || vuln.risk_level || vuln.severity || 'unknown';
+                                  const isHigh = risk.toLowerCase() === 'high';
+                                  const isMedium = risk.toLowerCase() === 'medium';
+                                  const isLow = !isHigh && !isMedium;
+                                  
+                                  // Direct inline styles based on risk level - more elegant with transparency
+                                  const badgeStyle = {
+                                    display: 'inline-block',
+                                    padding: '0.25rem 0.75rem',
+                                    borderRadius: '9999px',
+                                    fontSize: '0.75rem',
+                                    fontWeight: '500',
+                                    border: '1px solid',
+                                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                                    ...(isHigh
+                                      ? {
+                                          color: darkMode ? '#ef4444' : '#b91c1c',
+                                          backgroundColor: darkMode ? 'rgba(239, 68, 68, 0.15)' : 'rgba(254, 226, 226, 0.8)',
+                                          borderColor: darkMode ? 'rgba(239, 68, 68, 0.3)' : 'rgba(248, 113, 113, 0.3)'
+                                        }
+                                      : isMedium
+                                      ? {
+                                          color: darkMode ? '#f59e0b' : '#92400e',
+                                          backgroundColor: darkMode ? 'rgba(245, 158, 11, 0.15)' : 'rgba(254, 243, 199, 0.8)',
+                                          borderColor: darkMode ? 'rgba(245, 158, 11, 0.3)' : 'rgba(251, 191, 36, 0.3)'
+                                        }
+                                      : {
+                                          color: darkMode ? '#10b981' : '#065f46',
+                                          backgroundColor: darkMode ? 'rgba(16, 185, 129, 0.15)' : 'rgba(209, 250, 229, 0.8)',
+                                          borderColor: darkMode ? 'rgba(16, 185, 129, 0.3)' : 'rgba(52, 211, 153, 0.3)'
+                                        })
+                                  };
+                                  
+                                  return (
+                                    <span style={badgeStyle}>
+                                      {risk}
+                                    </span>
+                                  );
+                                })()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                {vuln.vulnerability_type || (
+                                  ((vuln.type || '').toLowerCase() === 'publickey' || (vuln.algorithm || '').toLowerCase().includes('rsa') || (vuln.algorithm || '').toLowerCase().includes('ecc')) 
+                                    ? "Shor's Algorithm" 
+                                    : "Grover's Algorithm"
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                {vuln.line_number || vuln.line}
+                              </td>
+                            </tr>
+                            
+                            {/* Expandable details row */}
+                            <tr key={`details-${index}`} id={`details-${index}`} className="hidden">
+                              <td colSpan={5} className="px-6 py-4">
+                                <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+                                  <div className="mb-3">
+                                    <h4 className="text-sm font-semibold mb-1">Description</h4>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                      {vuln.description || (
+                                        vuln.vulnerability_type === "Shor's Algorithm" || 
+                                        ((vuln.type || '').toLowerCase() === 'publickey' || (vuln.algorithm || '').toLowerCase().includes('rsa') || (vuln.algorithm || '').toLowerCase().includes('ecc'))
+                                          ? `${vuln.algorithm} is a public-key cryptographic algorithm vulnerable to quantum attacks using Shor's algorithm, which can break the underlying mathematical problem in polynomial time.`
+                                          : `${vuln.algorithm} with insufficient key size is vulnerable to quantum speed-up attacks using Grover's algorithm, which can reduce effective security by half.`
+                                      )}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-semibold mb-1">Recommendation</h4>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                      {vuln.recommendation || (
+                                        vuln.vulnerability_type === "Shor's Algorithm" || 
+                                        ((vuln.type || '').toLowerCase() === 'publickey' || (vuln.algorithm || '').toLowerCase().includes('rsa') || (vuln.algorithm || '').toLowerCase().includes('ecc'))
+                                          ? "Replace with NIST-standardized post-quantum cryptography like ML-KEM (CRYSTALS-Kyber) for encryption or ML-DSA (CRYSTALS-Dilithium) for digital signatures."
+                                          : "Increase key size to at least 256 bits to maintain adequate security margin against quantum attacks."
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          </>
                         ))}
                       </tbody>
                     </table>
