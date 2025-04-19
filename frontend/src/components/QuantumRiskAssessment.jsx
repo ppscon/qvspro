@@ -102,7 +102,9 @@ function uniqueRowKey(f, i) {
   return [safeCell(f.file_path), safeCell(f.file), safeCell(f.algorithm_name || f.algorithm), safeCell(f.line_number || f.line), i].filter(Boolean).join('::');
 }
 
-function QuantumRiskAssessment({ results }) {
+// Main component
+const QuantumRiskAssessment = ({ findings }) => {
+  const [results] = useState(findings || []);
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
   const [showFilters, setShowFilters] = useState(false);

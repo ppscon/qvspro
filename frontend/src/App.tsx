@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiSun, FiMoon, FiSearch, FiUpload, FiFile, FiFolder, FiTrash2, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link, Redirect } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import QuantumRiskAssessment from './components/QuantumRiskAssessment';
 import QuantumEducationHub from './components/QuantumEducationHub';
@@ -9,6 +9,11 @@ import QubitVisualization from './components/QubitVisualization';
 import PostQuantumCryptography from './components/PostQuantumCryptography';
 import GroversAlgorithm from './components/GroversAlgorithm';
 import QuantumGlossary from './components/QuantumGlossary';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import ProfilePage from './pages/Profile';
+import { AuthProvider } from './hooks/useAuth';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 // Full scanner app component
 const ScannerApp: React.FC = () => {
@@ -70,97 +75,116 @@ const ScannerApp: React.FC = () => {
     }
   };
 
-  // Helper to sanitize scan results
-  function sanitizeScanResults(results: any[]): any[] {
-    return results.map((item, idx) => {
-      if (React.isValidElement(item)) {
-        console.error('React element found in scan result at index', idx, item);
-        return '[React Element]';
-      }
-      if (Array.isArray(item)) {
-        console.error('Array found in scan result at index', idx, item);
-        return JSON.stringify(item);
-      }
-      if (item && typeof item === 'object') {
-        // Recursively sanitize all fields
-        const sanitized: any = {};
-        for (const key of Object.keys(item)) {
-          const val = item[key];
-          if (React.isValidElement(val)) {
-            console.error('React element found in scan result field', key, 'at index', idx, val);
-            sanitized[key] = '[React Element]';
-          } else if (Array.isArray(val)) {
-            sanitized[key] = JSON.stringify(val);
-          } else if (val && typeof val === 'object') {
-            sanitized[key] = JSON.stringify(val);
-          } else {
-            sanitized[key] = val;
-          }
-        }
-        return sanitized;
-      }
-      return item;
-    });
-  }
+  // Function to check if an object contains React elements recursively
+  const containsReactElement = (obj: any): boolean => {
+    if (obj === null || obj === undefined) {
+      return false;
+    }
+    
+    if (React.isValidElement(obj)) {
+      return true;
+    }
+    
+    if (Array.isArray(obj)) {
+      return obj.some(item => containsReactElement(item));
+    }
+    
+    if (typeof obj === 'object') {
+      return Object.values(obj).some(value => containsReactElement(value));
+    }
+    
+    return false;
+  };
 
-  // Handle scan button click
+  // Sanitize scan results to prevent React elements
+  const sanitizeScanResults = (results: any[]): any[] => {
+    try {
+      // Check if results is an array
+      if (!Array.isArray(results)) {
+        console.error('Scan results is not an array:', results);
+        return [];
+      }
+
+      return results.map((item: any) => {
+        try {
+          // Handle React elements, arrays, null, and undefined
+          if (React.isValidElement(item) || Array.isArray(item) || item === null || item === undefined) {
+            console.error('Invalid item in results:', item);
+            return {}; // Return an empty object for invalid items
+          }
+
+          // Handle non-object items
+          if (typeof item !== 'object') {
+            console.error('Item is not an object:', item);
+            return {}; // Return an empty object for non-object items
+          }
+          
+          // Create a new sanitized object
+          const sanitized: Record<string, any> = {};
+          
+          // Copy primitive values and check for nested React elements
+          for (const [key, value] of Object.entries(item)) {
+            if (containsReactElement(value)) {
+              console.error(`React element found in property ${key}:`, value);
+              sanitized[key] = value === null ? null : typeof value === 'object' ? {} : String(value);
+            } else {
+              sanitized[key] = value;
+            }
+          }
+          
+          return sanitized;
+        } catch (itemError) {
+          console.error('Error sanitizing item:', itemError);
+          return {}; // Return an empty object on error
+        }
+      });
+    } catch (error) {
+      console.error('Error sanitizing scan results:', error);
+      return []; // Return an empty array on error
+    }
+  };
+
+  // Handle scan action
   const handleScan = async () => {
-    if (files.length === 0) {
+    if (scanType === 'file' && files.length === 0) {
       setError('Please select at least one file to scan');
       return;
     }
 
+    if (scanType === 'directory' && !directory) {
+      setError('Please select a directory to scan');
+      return;
+    }
+
     setIsLoading(true);
-    setStatusMessage('Scanning...');
     setError(null);
+    setScanResults(null);
+    setStatusMessage('Scanning...');
 
     try {
       const formData = new FormData();
 
-      // IMPORTANT: The Flask API expects 'files[]' as the parameter name
-      // This is the exact format that Flask's request.files.getlist('files[]') expects
-      for (let i = 0; i < files.length; i++) {
-        formData.append('files[]', files[i]);
-      }
-
-      if (scanType === 'directory') {
-        formData.append('scan_type', 'directory');
+      if (scanType === 'file') {
+        // Append each file to the formData
+        files.forEach(file => {
+          formData.append('files[]', file);
+        });
       } else {
-        formData.append('scan_type', 'file');
+        // For directory scanning, which will be implemented in the backend
+        formData.append('directory', directory || '');
       }
 
-      console.log(`Sending ${files.length} ${scanType === 'file' ? 'files' : 'items from directory'} to API scan endpoint`);
-
-      // Use direct connection to API server
       const response = await fetch('http://127.0.0.1:5001/api/scan/', {
         method: 'POST',
-        body: formData
+        body: formData,
       });
-
-      console.log('Response status:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Scan failed:', response.status, errorText);
         throw new Error(`Scan failed with status: ${response.status}. ${errorText}`);
       }
 
-      // Parse successful response
       const data = await response.json();
-      console.log('Full scan results data:', data);
-
-      // Debug the structure of the vulnerability data
-      if (data.results && data.results.length > 0) {
-        console.log('First vulnerability structure:', JSON.stringify(data.results[0], null, 2));
-        console.log('All severity values:', data.results.map((v: any) => {
-          return {
-            algorithm: v.algorithm || v.algorithm_name,
-            risk: v.risk,
-            risk_level: v.risk_level,
-            severity: v.severity
-          };
-        }));
-      }
 
       // Sanitize results before setting state
       if (data.results && Array.isArray(data.results)) {
@@ -218,64 +242,40 @@ const ScannerApp: React.FC = () => {
     }
   };
 
-  // Helper function to convert results to CSV
-  function resultsToCSV(results: any[]): string {
-    if (!results || results.length === 0) return '';
-    const headers = Object.keys(results[0]);
-    const csvRows = [headers.join(',')];
-    for (const row of results) {
-      csvRows.push(headers.map(h => '"' + String(row[h]).replace(/"/g, '""') + '"').join(','));
+  // Function to generate file type labels
+  const getFileTypeLabel = (file: File): JSX.Element => {
+    const extension = file.name.split('.').pop()?.toLowerCase() || '';
+    let color = 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+    
+    switch (extension) {
+      case 'py':
+        color = 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        break;
+      case 'js':
+      case 'ts':
+        color = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+        break;
+      case 'java':
+        color = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+        break;
+      case 'c':
+      case 'cpp':
+      case 'h':
+        color = 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+        break;
+      case 'go':
+        color = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        break;
+      default:
+        break;
     }
-    return csvRows.join('\n');
-  }
-
-  const handleDownloadCBOM = () => {
-    if (!scanResults || !scanResults.results || scanResults.results.length === 0) return;
-    const csv = resultsToCSV(scanResults.results);
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'qvs_cbom.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    
+    return (
+      <span className={`inline-block px-2 py-1 text-xs font-semibold rounded ${color}`}>
+        {extension.toUpperCase()}
+      </span>
+    );
   };
-
-  const handleDownloadJSON = () => {
-    if (!scanResults || !scanResults.results || scanResults.results.length === 0) return;
-    const json = JSON.stringify(scanResults.results, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'qvs_cbom.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  // Helper to generate a unique key for a vulnerability row
-  function uniqueVulnKey(vuln: any, index: number) {
-    return [
-      vuln.file_path || vuln.file || '',
-      vuln.algorithm_name || vuln.algorithm || '',
-      vuln.line_number || vuln.line || '',
-      index
-    ].join('::');
-  }
-
-  // Helper to check for React elements or arrays in data
-  function containsReactElement(obj: any): boolean {
-    if (React.isValidElement(obj)) return true;
-    if (Array.isArray(obj)) return obj.some(containsReactElement);
-    if (obj && typeof obj === 'object') {
-      return Object.values(obj).some(containsReactElement);
-    }
-    return false;
-  }
 
   let scanResultsHasReactElement = false;
   if (scanResults && scanResults.results) {
@@ -312,6 +312,9 @@ const ScannerApp: React.FC = () => {
             </Link>
             <Link to="/education" className="nav-link">
               Learn
+            </Link>
+            <Link to="/dashboard" className="nav-link">
+              Dashboard
             </Link>
             <button
               type="button"
@@ -380,84 +383,81 @@ const ScannerApp: React.FC = () => {
                 <FiSearch className="mr-2" />
                 Demo Scan
               </button>
-              <span className="text-xs text-gray-500 ml-2">(Runs on built-in test files. Great for demos!)</span>
             </div>
 
-            {/* File upload area */}
-            <div
-              className="file-drop-area mb-6"
-              onClick={triggerFileInput}
-            >
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                multiple
-                className="hidden"
-                accept={scanType === 'file' ?
-                  ".js,.py,.java,.cpp,.c,.go,.rs,.php,.rb,.cs,.ts,.swift" :
-                  undefined}
-                {...(scanType === 'directory' ? { webkitdirectory: "", directory: "" } : {})}
-              />
-              <div className="text-center">
-                <FiUpload className="mx-auto h-12 w-12 text-gray-400" />
-                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                  Click to select {scanType === 'file' ? 'files' : 'a directory'} for scanning
-                </p>
-                {scanType === 'file' && (
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
-                    Supports JavaScript, Python, Java, C++, C, Go, Rust, PHP, Ruby, C#, TypeScript, Swift
-                  </p>
-                )}
-                {scanType === 'directory' && (
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
-                    Select a directory containing code files to scan recursively
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Selected files display */}
-            {files.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-2">Selected Files:</h3>
-                <ul className="space-y-1 max-h-40 overflow-y-auto">
-                  {files.map((file, index) => (
-                    <li
-                      key={index}
-                      className="flex items-center justify-between p-2 rounded-md bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-200"
-                    >
-                      <span className="truncate max-w-md">{file.name}</span>
-                      <span className="text-sm text-gray-500">{(file.size / 1024).toFixed(1)} KB</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Status message and error display */}
+            {/* File/Directory Selection */}
             <div className="mb-6">
-              {statusMessage && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">{statusMessage}</p>
-              )}
-              {error && (
-                <p className="text-sm text-red-500 flex items-center mt-1">
-                  <FiAlertTriangle className="mr-1" /> {error}
-                </p>
+              {scanType === 'file' ? (
+                <div className="flex flex-col">
+                  <div
+                    className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-primary dark:hover:border-primary"
+                    onClick={triggerFileInput}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                    <FiUpload className="mx-auto mb-4 text-gray-400 dark:text-gray-600" size={32} />
+                    <p className="text-gray-600 dark:text-gray-400 mb-2">
+                      {files.length > 0
+                        ? `${files.length} file(s) selected`
+                        : 'Click to select or drag and drop files here'}
+                    </p>
+                    <button
+                      type="button"
+                      className="mt-2 px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-dark"
+                    >
+                      Select Files
+                    </button>
+                  </div>
+
+                  {files.length > 0 && (
+                    <div className="mt-4">
+                      <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Selected Files:</h3>
+                      <div className="max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50 dark:bg-gray-800">
+                        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                          {Array.from(files).map((file, index) => (
+                            <li key={index} className="py-2 flex items-center justify-between">
+                              <div className="flex items-center">
+                                <span className="mr-2">{getFileTypeLabel(file)}</span>
+                                <span className="text-gray-700 dark:text-gray-300">{file.name}</span>
+                              </div>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {(file.size / 1024).toFixed(1)} KB
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div
+                  className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center cursor-not-allowed opacity-60"
+                >
+                  <FiFolder className="mx-auto mb-4 text-gray-400 dark:text-gray-600" size={32} />
+                  <p className="text-gray-600 dark:text-gray-400 mb-2">
+                    Directory scanning coming soon!
+                  </p>
+                </div>
               )}
             </div>
 
-            {/* Action buttons */}
+            {/* Action Buttons */}
             <div className="flex space-x-4">
               <button
                 type="button"
                 onClick={handleScan}
-                disabled={isLoading || files.length === 0}
-                className="scan-button disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isLoading || (scanType === 'file' && files.length === 0)}
+                className="flex-1 flex justify-center items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -470,303 +470,168 @@ const ScannerApp: React.FC = () => {
                   </>
                 )}
               </button>
-              {(files.length > 0 || scanResults) && (
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 dark:text-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
-                >
-                  <FiTrash2 className="mr-2 inline" />
-                  Reset
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={isLoading}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <FiTrash2 />
+              </button>
+            </div>
+
+            {/* Status Message */}
+            <div className="mt-6 text-center">
+              <p
+                className={`py-2 px-3 rounded-md inline-block text-sm ${error
+                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                    : isLoading
+                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                      : scanResults
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                  }`}
+              >
+                {error ? (
+                  <span className="flex items-center">
+                    <FiAlertTriangle className="mr-2" /> {error}
+                  </span>
+                ) : (
+                  <span className="flex items-center">
+                    {scanResults && !isLoading && <FiCheckCircle className="mr-2" />}
+                    {statusMessage}
+                  </span>
+                )}
+              </p>
             </div>
           </div>
 
-          {/* Results section */}
+          {/* Scan Results */}
           {scanResults && (
             <div className="section p-6 mt-6">
-              {scanResultsHasReactElement ? (
-                <div className="text-red-600 font-bold text-lg">
-                  Error: Scan results contain invalid data (React element or array). Please check your backend or data source.<br />
-                  See the browser console for details.
+              <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Scan Results</h3>
+              
+              {/* Download CBOM button */}
+              <div className="mb-4">
+                <button
+                  onClick={() => {
+                    // Create CSV content
+                    const headers = ['File', 'Line', 'Risk', 'Vulnerability', 'Algorithm', 'Description', 'Recommendation'];
+                    const rows = scanResults.results.map((r: any) => [
+                      r.file_path || 'N/A',
+                      r.line_number || 'N/A',
+                      r.risk_level || 'Unknown',
+                      r.vulnerability_type || 'Unknown',
+                      r.algorithm || 'N/A',
+                      r.description || 'N/A',
+                      r.recommendation || 'N/A'
+                    ]);
+                    const csvContent = [headers, ...rows].map(e => e.map(item => `"${String(item).replace(/"/g, '""')}"`).join(',')).join('\n');
+                    
+                    // Create and download the file
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'quantum_vulnerabilities_cbom.csv');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-sm flex items-center"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download CBOM (CSV)
+                </button>
+              </div>
+              
+              {/* Results table */}
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-100 dark:bg-gray-700">
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">File</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">Line</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">Risk</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">Vulnerability</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">Description</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">Recommendation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {scanResults.results.map((result: any, index: number) => (
+                      <tr
+                        key={`result-${index}`}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
+                      >
+                        <td className="p-3 text-gray-700 dark:text-gray-300">
+                          <span className="font-mono text-xs">{result.file_path || 'N/A'}</span>
+                        </td>
+                        <td className="p-3 text-gray-700 dark:text-gray-300">
+                          {result.line_number || 'N/A'}
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
+                              result.risk_level === 'Critical'
+                                ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                : result.risk_level === 'High'
+                                  ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                                  : result.risk_level === 'Medium'
+                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                    : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                            }`}
+                          >
+                            {result.risk_level || 'Unknown'}
+                          </span>
+                        </td>
+                        <td className="p-3 text-gray-700 dark:text-gray-300">
+                          {result.vulnerability_type || 'Unknown'}
+                        </td>
+                        <td className="p-3 text-gray-700 dark:text-gray-300">
+                          {result.description || 'No description provided'}
+                        </td>
+                        <td className="p-3 text-gray-700 dark:text-gray-300">
+                          {result.recommendation || 'No recommendation provided'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Render QuantumRiskAssessment component with the scan results */}
+              {scanResults && scanResults.results && scanResults.results.length > 0 && (
+                <div className="mt-8">
+                  <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                    Quantum Risk Assessment
+                  </h3>
+                  <QuantumRiskAssessment findings={scanResults.results} />
                 </div>
-              ) : (
-                <>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-semibold">Scan Results</h3>
-                    {scanResults.results && scanResults.results.length > 0 && (
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={handleDownloadCBOM}
-                          className="px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300 text-sm font-medium"
-                          title="Download Cryptography Bill of Materials (CBOM) as CSV"
-                        >
-                          Download CBOM (CSV)
-                        </button>
-                        <button
-                          type="button"
-                          onClick={handleDownloadJSON}
-                          className="px-4 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm font-medium"
-                          title="Download Cryptography Bill of Materials (CBOM) as JSON"
-                        >
-                          Download CBOM (JSON)
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {scanResults.results && scanResults.results.length > 0 ? (
-                    <div className="space-y-6">
-                      {/* Vulnerability summary */}
-                      <div className="flex items-center justify-between">
-                        <p className="flex items-center text-amber-600 dark:text-amber-400">
-                          <FiAlertTriangle className="mr-2" />
-                          Found {scanResults.vulnerabilities_count || scanResults.results.length} potential vulnerabilities
-                        </p>
-
-                        {/* Risk distribution chart */}
-                        <div className="flex items-center space-x-2">
-                          {(() => {
-                            const highCount = scanResults.results.filter((v: any) =>
-                              (v.risk || '').toLowerCase() === 'high').length;
-                            const mediumCount = scanResults.results.filter((v: any) =>
-                              (v.risk || '').toLowerCase() === 'medium').length;
-                            const lowCount = scanResults.results.filter((v: any) =>
-                              (v.risk || '').toLowerCase() === 'low').length;
-
-                            return (
-                              <>
-                                <div className="flex flex-col items-center">
-                                  <div className="flex items-center">
-                                    <div className="w-3 h-3 rounded-full bg-red-500 mr-1"></div>
-                                    <span className="text-xs font-medium">{highCount} High</span>
-                                  </div>
-                                  <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1">
-                                    <div
-                                      className="h-full bg-red-500"
-                                      style={{ width: `${(highCount / scanResults.results.length) * 100}%` }}
-                                    ></div>
-                                  </div>
-                                </div>
-
-                                <div className="flex flex-col items-center">
-                                  <div className="flex items-center">
-                                    <div className="w-3 h-3 rounded-full bg-amber-500 mr-1"></div>
-                                    <span className="text-xs font-medium">{mediumCount} Medium</span>
-                                  </div>
-                                  <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1">
-                                    <div
-                                      className="h-full bg-amber-500"
-                                      style={{ width: `${(mediumCount / scanResults.results.length) * 100}%` }}
-                                    ></div>
-                                  </div>
-                                </div>
-
-                                <div className="flex flex-col items-center">
-                                  <div className="flex items-center">
-                                    <div className="w-3 h-3 rounded-full bg-green-500 mr-1"></div>
-                                    <span className="text-xs font-medium">{lowCount} Low</span>
-                                  </div>
-                                  <div className="w-20 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1">
-                                    <div
-                                      className="h-full bg-green-500"
-                                      style={{ width: `${(lowCount / scanResults.results.length) * 100}%` }}
-                                    ></div>
-                                  </div>
-                                </div>
-                              </>
-                            );
-                          })()}
-                        </div>
-                      </div>
-
-                      {/* Algorithm type summary */}
-                      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                        <h4 className="text-sm font-medium mb-2">Vulnerability Types</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {(() => {
-                            // Get unique vulnerability types with proper typing
-                            const vulnTypes: string[] = Array.from(new Set(scanResults.results.map((v: any) =>
-                              v.vulnerability_type || (
-                                ((v.type || '').toLowerCase() === 'publickey' || (v.algorithm || '').toLowerCase().includes('rsa') || (v.algorithm || '').toLowerCase().includes('ecc'))
-                                  ? "Shor's Algorithm"
-                                  : "Grover's Algorithm"
-                              )
-                            )));
-
-                            return vulnTypes.map((type: string, i: number) => {
-                              const count = scanResults.results.filter((v: any) =>
-                                v.vulnerability_type === type ||
-                                (!v.vulnerability_type && type === "Shor's Algorithm" &&
-                                  ((v.type || '').toLowerCase() === 'publickey' || (v.algorithm || '').toLowerCase().includes('rsa') || (v.algorithm || '').toLowerCase().includes('ecc'))) ||
-                                (!v.vulnerability_type && type === "Grover's Algorithm" &&
-                                  !((v.type || '').toLowerCase() === 'publickey' || (v.algorithm || '').toLowerCase().includes('rsa') || (v.algorithm || '').toLowerCase().includes('ecc')))
-                              ).length;
-
-                              return (
-                                <div key={i} className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
-                                  {type} ({count})
-                                </div>
-                              );
-                            });
-                          })()}
-                        </div>
-                      </div>
-
-                      <div className="overflow-auto">
-                        <table className="min-w-full bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                          <thead className="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                File
-                              </th>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Algorithm
-                              </th>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Risk Level
-                              </th>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Vulnerability Type
-                              </th>
-                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                Line
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                            {scanResults.results.map((vuln: any, index: number) => (
-                              <React.Fragment key={uniqueVulnKey(vuln, index)}>
-                                <tr
-                                  className="group hover:bg-gray-50 dark:hover:bg-gray-800/70 cursor-pointer"
-                                  onClick={() => {
-                                    // Toggle expanded details
-                                    const expandedDetails = document.getElementById(`details-${index}`);
-                                    if (expandedDetails) {
-                                      expandedDetails.classList.toggle('hidden');
-                                    }
-                                  }}
-                                >
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200">
-                                    {vuln.file_path || vuln.file}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {vuln.algorithm_name || vuln.algorithm}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    {(() => {
-                                      const risk = vuln.risk || vuln.risk_level || vuln.severity || 'unknown';
-                                      const isHigh = risk.toLowerCase() === 'high';
-                                      const isMedium = risk.toLowerCase() === 'medium';
-                                      const isLow = !isHigh && !isMedium;
-                                      const badgeStyle = {
-                                        display: 'inline-block',
-                                        padding: '0.25rem 0.75rem',
-                                        borderRadius: '9999px',
-                                        fontSize: '0.75rem',
-                                        fontWeight: '500',
-                                        border: '1px solid',
-                                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                                        ...(isHigh
-                                          ? {
-                                            color: darkMode ? '#ef4444' : '#b91c1c',
-                                            backgroundColor: darkMode ? 'rgba(239, 68, 68, 0.15)' : 'rgba(254, 226, 226, 0.8)',
-                                            borderColor: darkMode ? 'rgba(239, 68, 68, 0.3)' : 'rgba(248, 113, 113, 0.3)'
-                                          }
-                                          : isMedium
-                                            ? {
-                                              color: darkMode ? '#f59e0b' : '#92400e',
-                                              backgroundColor: darkMode ? 'rgba(245, 158, 11, 0.15)' : 'rgba(254, 243, 199, 0.8)',
-                                              borderColor: darkMode ? 'rgba(245, 158, 11, 0.3)' : 'rgba(251, 191, 36, 0.3)'
-                                            }
-                                            : {
-                                              color: darkMode ? '#10b981' : '#065f46',
-                                              backgroundColor: darkMode ? 'rgba(16, 185, 129, 0.15)' : 'rgba(209, 250, 229, 0.8)',
-                                              borderColor: darkMode ? 'rgba(16, 185, 129, 0.3)' : 'rgba(52, 211, 153, 0.3)'
-                                            })
-                                      };
-                                      return <span style={badgeStyle}>{risk}</span>;
-                                    })()}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {vuln.vulnerability_type || (
-                                      ((vuln.type || '').toLowerCase() === 'publickey' || (vuln.algorithm || '').toLowerCase().includes('rsa') || (vuln.algorithm || '').toLowerCase().includes('ecc'))
-                                        ? "Shor's Algorithm"
-                                        : "Grover's Algorithm"
-                                    )}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {vuln.line_number || vuln.line}
-                                  </td>
-                                </tr>
-                                <tr
-                                  id={`details-${index}`}
-                                  className="hidden"
-                                >
-                                  <td colSpan={5} className="px-6 py-4">
-                                    <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-                                      <div className="mb-3">
-                                        <h4 className="text-sm font-semibold mb-1">Description</h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                          {vuln.description || (
-                                            vuln.vulnerability_type === "Shor's Algorithm" ||
-                                              ((vuln.type || '').toLowerCase() === 'publickey' || (vuln.algorithm || '').toLowerCase().includes('rsa') || (vuln.algorithm || '').toLowerCase().includes('ecc'))
-                                              ? `${vuln.algorithm} is a public-key cryptographic algorithm vulnerable to quantum attacks using Shor's algorithm, which can break the underlying mathematical problem in polynomial time.`
-                                              : `${vuln.algorithm} with insufficient key size is vulnerable to quantum speed-up attacks using Grover's algorithm, which can reduce effective security by half.`
-                                          )}
-                                        </p>
-                                      </div>
-                                      <div>
-                                        <h4 className="text-sm font-semibold mb-1">Recommendation</h4>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                                          {vuln.recommendation || (
-                                            vuln.vulnerability_type === "Shor's Algorithm" ||
-                                              ((vuln.type || '').toLowerCase() === 'publickey' || (vuln.algorithm || '').toLowerCase().includes('rsa') || (vuln.algorithm || '').toLowerCase().includes('ecc'))
-                                              ? "Replace with NIST-standardized post-quantum cryptography like ML-KEM (CRYSTALS-Kyber) for encryption or ML-DSA (CRYSTALS-Dilithium) for digital signatures."
-                                              : "Increase key size to at least 256 bits to maintain adequate security margin against quantum attacks."
-                                          )}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
-                              </React.Fragment>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <FiCheckCircle className="mx-auto h-12 w-12 text-green-500" />
-                      <h3 className="mt-2 text-xl font-medium text-gray-900 dark:text-gray-100">No vulnerabilities found</h3>
-                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Your code appears to be free from known quantum-vulnerable cryptographic algorithms</p>
-                    </div>
-                  )}
-                </>
               )}
             </div>
-          )}
-
-          {scanResults && scanResults.results && scanResults.results.length > 0 && (
-            <QuantumRiskAssessment results={scanResults.results} />
           )}
         </div>
       </main>
 
-      <footer className="footer" style={{ backgroundColor: darkMode ? '#1f2937' : '#f3f4f6', color: darkMode ? '#9ca3af' : '#6b7280', padding: '1.5rem 0', marginTop: 'auto', textAlign: 'center' }}>
+      <footer className="footer">
         <div className="container">
-          <div className="flex items-center justify-center mb-2" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.5rem' }}>
-            <img
-              src="/images/logo-qvs.png"
-              alt="QVS-Pro Logo"
-              className="logo-qvs-footer"
-            />
+          <div className="flex flex-col md:flex-row items-center justify-between py-6">
+            <div className="flex items-center space-x-4">
+              <img
+                src="/images/logo-qvs.png"
+                alt="QVS-Pro Logo"
+                className="logo-qvs-footer"
+              />
+            </div>
+            <div className="mt-4 md:mt-0 text-center md:text-right">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                &copy; {new Date().getFullYear()} Quantum Vulnerability Scanner. All rights reserved.
+              </p>
+            </div>
           </div>
-          <p>Quantum Vulnerability Scanner Pro &copy; {new Date().getFullYear()}</p>
-          <p className="mt-4" style={{ marginTop: '1rem' }}>Scan your code for quantum-vulnerable cryptographic algorithms</p>
         </div>
       </footer>
     </div>
@@ -776,18 +641,30 @@ const ScannerApp: React.FC = () => {
 // Main App component with routes
 const App: React.FC = () => {
   return (
-    <Router>
-      <Switch>
-        <Route exact path="/" component={LandingPage} />
-        <Route path="/app" component={ScannerApp} />
-        <Route exact path="/education" component={QuantumEducationHub} />
-        <Route path="/education/shors-algorithm" component={ShorsAlgorithmDemo} />
-        <Route path="/education/qubits" component={QubitVisualization} />
-        <Route path="/education/post-quantum" component={PostQuantumCryptography} />
-        <Route path="/education/grovers-algorithm" component={GroversAlgorithm} />
-        <Route path="/education/glossary" component={QuantumGlossary} />
-      </Switch>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Switch>
+          <Route exact path="/" component={LandingPage} />
+          <Route path="/login" component={Login} />
+          <ProtectedRoute path="/app" redirectTo="/login">
+            <ScannerApp />
+          </ProtectedRoute>
+          <ProtectedRoute path="/dashboard" redirectTo="/login">
+            <Dashboard />
+          </ProtectedRoute>
+          <ProtectedRoute path="/profile" redirectTo="/login">
+            <ProfilePage />
+          </ProtectedRoute>
+          <Route exact path="/education" component={QuantumEducationHub} />
+          <Route path="/education/shors-algorithm" component={ShorsAlgorithmDemo} />
+          <Route path="/education/qubits" component={QubitVisualization} />
+          <Route path="/education/post-quantum" component={PostQuantumCryptography} />
+          <Route path="/education/grovers-algorithm" component={GroversAlgorithm} />
+          <Route path="/education/glossary" component={QuantumGlossary} />
+          <Redirect to="/" />
+        </Switch>
+      </Router>
+    </AuthProvider>
   );
 };
 
