@@ -12,8 +12,10 @@ import QuantumGlossary from './components/QuantumGlossary';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProfilePage from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
 import { AuthProvider } from './hooks/useAuth';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import SignOutButton from './components/SignOutButton';
 
 // Full scanner app component
 const ScannerApp: React.FC = () => {
@@ -316,6 +318,10 @@ const ScannerApp: React.FC = () => {
             <Link to="/dashboard" className="nav-link">
               Dashboard
             </Link>
+            <Link to="/profile" className="nav-link">
+              Profile
+            </Link>
+            <SignOutButton className="nav-link" />
             <button
               type="button"
               onClick={toggleTheme}
@@ -526,7 +532,7 @@ const ScannerApp: React.FC = () => {
                       r.description || 'N/A',
                       r.recommendation || 'N/A'
                     ]);
-                    const csvContent = [headers, ...rows].map(e => e.map(item => `"${String(item).replace(/"/g, '""')}"`).join(',')).join('\n');
+                    const csvContent = [headers, ...rows].map(e => e.map((item: string | number) => `"${String(item).replace(/"/g, '""')}"`).join(',')).join('\n');
                     
                     // Create and download the file
                     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -628,7 +634,7 @@ const ScannerApp: React.FC = () => {
             </div>
             <div className="mt-4 md:mt-0 text-center md:text-right">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                &copy; {new Date().getFullYear()} Quantum Vulnerability Scanner. All rights reserved.
+                &copy; {new Date().getFullYear()} Quantum Vulnerability Scanner | <a href="https://qvspro.net" className="hover:underline">qvspro.net</a> | All rights reserved.
               </p>
             </div>
           </div>
@@ -654,6 +660,9 @@ const App: React.FC = () => {
           </ProtectedRoute>
           <ProtectedRoute path="/profile" redirectTo="/login">
             <ProfilePage />
+          </ProtectedRoute>
+          <ProtectedRoute path="/admin" redirectTo="/login">
+            <AdminDashboard />
           </ProtectedRoute>
           <Route exact path="/education" component={QuantumEducationHub} />
           <Route path="/education/shors-algorithm" component={ShorsAlgorithmDemo} />

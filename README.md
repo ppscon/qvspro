@@ -1,6 +1,6 @@
 # QVS-Pro: Quantum Vulnerability Scanner Pro
 
-QVS-Pro is an advanced tool for scanning codebases and identifying cryptographic algorithms potentially vulnerable to quantum computing attacks.
+QVS-Pro is an advanced tool for scanning codebases and identifying cryptographic algorithms potentially vulnerable to quantum computing attacks. Visit us at [qvspro.net](https://qvspro.net).
 
 ## Project Structure
 
@@ -21,12 +21,14 @@ QVS-Pro is an advanced tool for scanning codebases and identifying cryptographic
 ### Setup
 
 1. Install Go dependencies:
+
    ```
    cd scanner
    go mod tidy
    ```
 
 2. Install Python dependencies:
+
    ```
    cd api
    pip install -r requirements.txt
@@ -41,6 +43,7 @@ QVS-Pro is an advanced tool for scanning codebases and identifying cryptographic
 ### Running the Development Environment
 
 Use the development script:
+
 ```
 ./scripts/dev.sh
 ```
@@ -48,6 +51,7 @@ Use the development script:
 ## Architecture
 
 QVS-Pro uses a three-tier architecture:
+
 - The Go scanner provides high-performance code analysis
 - The Python Flask API coordinates between frontend and scanner
 - The React frontend delivers a responsive, elegant user experience with dark/light mode support

@@ -290,9 +290,10 @@ const LandingPage: React.FC = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center">
             <img src="/images/logo-qvs.png" alt="QVS Logo" className="logo-qvs-footer" />
+            <span className="ml-2 text-white">qvspro.net</span>
           </div>
           <div className="mt-6 md:mt-0 text-gray-400 text-sm">
-            &copy; {new Date().getFullYear()} Quantum Vulnerability Scanner. All rights reserved.
+            &copy; {new Date().getFullYear()} Quantum Vulnerability Scanner | <a href="https://qvspro.net" className="hover:underline">qvspro.net</a> | All rights reserved.
           </div>
         </div>
       </footer>

@@ -289,7 +289,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="mt-4 md:mt-0 text-center md:text-right">
               <p className="text-sm text-gray-400">
-                &copy; {new Date().getFullYear()} Quantum Vulnerability Scanner. All rights reserved.
+                &copy; {new Date().getFullYear()} Quantum Vulnerability Scanner | <a href="https://qvspro.net" className="text-blue-400 hover:underline">qvspro.net</a> | All rights reserved.
               </p>
             </div>
           </div>

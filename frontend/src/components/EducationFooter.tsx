@@ -9,11 +9,12 @@ const EducationFooter: React.FC = () => {
           <div className="flex items-center mb-4 md:mb-0">
             <Link to="/" className="flex items-center">
               <img src="/images/logo-qvs.png" alt="QVS-Pro Logo" className="logo-qvs-footer" style={{ height: '30px' }} />
+              <span className="ml-2 text-gray-700 dark:text-gray-300">qvspro.net</span>
             </Link>
           </div>
           
           <div className="text-center md:text-right text-sm text-gray-600 dark:text-gray-400">
-            <p>Quantum Vulnerability Scanner © {new Date().getFullYear()}</p>
+            <p>Quantum Vulnerability Scanner © {new Date().getFullYear()} | <a href="https://qvspro.net" className="hover:underline">qvspro.net</a></p>
             <p>Protecting today's cryptography from tomorrow's threats</p>
           </div>
         </div>
