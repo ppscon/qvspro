@@ -84,6 +84,11 @@ function safeCell(val) {
     return '[React Element]';
   }
   if (typeof val === 'object') {
+    // Handle error objects from sanitization
+    if (val.error) {
+      console.warn('Error object found in scan result field:', val);
+      return val.data ? `Error: ${val.error} (${val.data})` : `Error: ${val.error}`;
+    }
     // Debug log for objects in data
     // eslint-disable-next-line no-console
     console.warn('Object found in scan result field:', val);

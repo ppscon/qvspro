@@ -186,6 +186,83 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* Education Hub Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto" id="education-hub">
+        <div className="lg:grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="text-3xl font-bold mb-6">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-500">Quantum Computing Education Hub</span>
+            </h2>
+            <p className="text-gray-300 mb-6">
+              Learn the fundamentals of quantum computing and how it impacts cryptography with our interactive educational tools.
+            </p>
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-blue-500 bg-opacity-30 flex items-center justify-center mt-1">
+                  <span className="text-blue-300 text-sm">✓</span>
+                </div>
+                <p className="ml-3 text-gray-300">Interactive Shor's Algorithm demonstration</p>
+              </div>
+              <div className="flex items-start">
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-blue-500 bg-opacity-30 flex items-center justify-center mt-1">
+                  <span className="text-blue-300 text-sm">✓</span>
+                </div>
+                <p className="ml-3 text-gray-300">Quantum bits (Qubits) visualization and explanation</p>
+              </div>
+              <div className="flex items-start">
+                <div className="flex-shrink-0 h-6 w-6 rounded-full bg-blue-500 bg-opacity-30 flex items-center justify-center mt-1">
+                  <span className="text-blue-300 text-sm">✓</span>
+                </div>
+                <p className="ml-3 text-gray-300">Post-quantum cryptography resources</p>
+              </div>
+            </div>
+            <div className="mt-8">
+              <Link
+                to="/education"
+                className="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium shadow-lg hover:shadow-xl transition-all inline-flex items-center"
+              >
+                Explore Education Hub <FiArrowRight className="ml-2" />
+              </Link>
+            </div>
+          </div>
+          <div className="mt-12 lg:mt-0">
+            <div className="relative mx-auto w-full max-w-md">
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg blur-md opacity-75 animate-pulse"></div>
+              <div className="relative bg-gray-900 p-5 rounded-lg">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-800 p-4 rounded-lg">
+                    <h3 className="text-sm font-semibold text-purple-400 mb-2">Shor's Algorithm</h3>
+                    <div className="h-20 w-full bg-purple-900 bg-opacity-20 rounded flex items-center justify-center">
+                      <div className="text-xs text-purple-300 font-mono">f(x) = a^x mod N</div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-800 p-4 rounded-lg">
+                    <h3 className="text-sm font-semibold text-blue-400 mb-2">Qubit States</h3>
+                    <div className="h-20 w-full bg-blue-900 bg-opacity-20 rounded flex items-center justify-center">
+                      <div className="text-xs text-blue-300 font-mono">|ψ⟩ = α|0⟩ + β|1⟩</div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-800 p-4 rounded-lg">
+                    <h3 className="text-sm font-semibold text-indigo-400 mb-2">Bloch Sphere</h3>
+                    <div className="h-20 w-full bg-indigo-900 bg-opacity-20 rounded-full flex items-center justify-center">
+                      <div className="h-12 w-12 rounded-full border border-indigo-400 relative">
+                        <div className="absolute h-2 w-2 bg-indigo-500 rounded-full top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-gray-800 p-4 rounded-lg">
+                    <h3 className="text-sm font-semibold text-teal-400 mb-2">Post-Quantum</h3>
+                    <div className="h-20 w-full bg-teal-900 bg-opacity-20 rounded flex items-center justify-center">
+                      <div className="text-xs text-teal-300 font-mono">Quantum-Safe</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-800 shadow-xl overflow-hidden">

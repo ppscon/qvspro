@@ -3,6 +3,12 @@ import { FiSun, FiMoon, FiSearch, FiUpload, FiFile, FiFolder, FiTrash2, FiAlertT
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import QuantumRiskAssessment from './components/QuantumRiskAssessment';
+import QuantumEducationHub from './components/QuantumEducationHub';
+import ShorsAlgorithmDemo from './components/ShorsAlgorithmDemo';
+import QubitVisualization from './components/QubitVisualization';
+import PostQuantumCryptography from './components/PostQuantumCryptography';
+import GroversAlgorithm from './components/GroversAlgorithm';
+import QuantumGlossary from './components/QuantumGlossary';
 
 // Full scanner app component
 const ScannerApp: React.FC = () => {
@@ -303,6 +309,9 @@ const ScannerApp: React.FC = () => {
             </Link>
             <Link to="/app" className="nav-link">
               Scanner
+            </Link>
+            <Link to="/education" className="nav-link">
+              Learn
             </Link>
             <button
               type="button"
@@ -764,12 +773,19 @@ const ScannerApp: React.FC = () => {
   );
 };
 
+// Main App component with routes
 const App: React.FC = () => {
   return (
     <Router>
       <Switch>
         <Route exact path="/" component={LandingPage} />
         <Route path="/app" component={ScannerApp} />
+        <Route exact path="/education" component={QuantumEducationHub} />
+        <Route path="/education/shors-algorithm" component={ShorsAlgorithmDemo} />
+        <Route path="/education/qubits" component={QubitVisualization} />
+        <Route path="/education/post-quantum" component={PostQuantumCryptography} />
+        <Route path="/education/grovers-algorithm" component={GroversAlgorithm} />
+        <Route path="/education/glossary" component={QuantumGlossary} />
       </Switch>
     </Router>
   );
