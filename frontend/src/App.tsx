@@ -148,6 +148,31 @@ const ScannerApp: React.FC = () => {
     }
   };
 
+  // Add this function inside ScannerApp
+  const handleDemoScan = async () => {
+    setIsLoading(true);
+    setStatusMessage('Running demo scan on built-in quantum-vulnerable files...');
+    setError(null);
+    setFiles([]);
+    setDirectory(null);
+    setScanResults(null);
+    try {
+      const response = await fetch('http://127.0.0.1:5001/api/scan/demo');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Demo scan failed with status: ${response.status}. ${errorText}`);
+      }
+      const data = await response.json();
+      setScanResults(data);
+      setStatusMessage('Demo scan completed! These are results from built-in quantum-vulnerable test files.');
+    } catch (err: any) {
+      setError(`Demo scan error: ${err.message}`);
+      setStatusMessage('Demo scan failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="App min-h-screen flex flex-col">
       <header className="header">
@@ -158,10 +183,8 @@ const ScannerApp: React.FC = () => {
                 src="/images/logo-qvs.png" 
                 alt="QVS-Pro Logo" 
                 className="logo-qvs"
-                style={{ height: '40px', width: 'auto', marginRight: '0.75rem' }}
               />
             </Link>
-            <Link to="/" className="nav-link">QVS-Pro</Link>
           </h1>
           
           <div className="flex items-center space-x-4">
@@ -203,8 +226,8 @@ const ScannerApp: React.FC = () => {
           </div>
 
           <div className="section p-6">
-            {/* Scan type selection */}
-            <div className="flex space-x-4 mb-6">
+            {/* Scan type selection + Demo Scan button */}
+            <div className="flex space-x-4 mb-6 items-center">
               <button
                 type="button"
                 onClick={() => toggleScanType('file')}
@@ -229,6 +252,18 @@ const ScannerApp: React.FC = () => {
                 <FiFolder className="mr-2" />
                 Directory Scan
               </button>
+              <button
+                type="button"
+                onClick={handleDemoScan}
+                className="flex items-center px-4 py-2 rounded-md bg-yellow-400 text-gray-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                title="Try a demo scan using built-in quantum-vulnerable test files."
+                disabled={isLoading}
+                style={{ marginLeft: '1rem' }}
+              >
+                <FiSearch className="mr-2" />
+                Demo Scan
+              </button>
+              <span className="text-xs text-gray-500 ml-2">(Runs on built-in test files. Great for demos!)</span>
             </div>
 
             {/* File upload area */}
@@ -570,9 +605,7 @@ const ScannerApp: React.FC = () => {
               src="/images/logo-qvs.png"
               alt="QVS-Pro Logo" 
               className="logo-qvs-footer"
-              style={{ height: '30px', width: 'auto', marginRight: '0.5rem' }}
             />
-            <span className="heading" style={{ fontSize: '1.5rem', fontWeight: 600 }}>QVS-Pro</span>
           </div>
           <p>Quantum Vulnerability Scanner Pro &copy; {new Date().getFullYear()}</p>
           <p className="mt-4" style={{ marginTop: '1rem' }}>Scan your code for quantum-vulnerable cryptographic algorithms</p>

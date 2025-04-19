@@ -16,7 +16,6 @@ const LandingPage: React.FC = () => {
           />
           <div className="absolute inset-0 bg-black bg-opacity-50"></div>
         </div>
-        
         {/* Hero Content */}
         <div className="relative z-10 max-w-6xl mx-auto px-4 py-24 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-2 gap-12 items-center">
@@ -42,7 +41,6 @@ const LandingPage: React.FC = () => {
                 </a>
               </div>
             </div>
-            
             <div className="mt-12 lg:mt-0 flex justify-center">
               <div className="relative w-80 h-80">
                 <div className="absolute inset-0 bg-blue-500 bg-opacity-20 rounded-full animate-pulse"></div>
@@ -66,11 +64,9 @@ const LandingPage: React.FC = () => {
         <h2 className="text-3xl font-bold text-center mb-12">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Quantum Timeline</span>
         </h2>
-        
         <div className="relative">
           {/* Timeline Line */}
           <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-blue-600 bg-opacity-30"></div>
-          
           {/* Timeline Events */}
           <div className="space-y-24">
             {/* Event 1 */}
@@ -79,7 +75,6 @@ const LandingPage: React.FC = () => {
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-purple-500 rounded-full"></div>
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-8 h-8 bg-purple-500 bg-opacity-30 rounded-full animate-ping"></div>
               </div>
-              
               <div className="ml-8 md:ml-0 md:grid md:grid-cols-2 md:gap-8">
                 <div className="hidden md:block md:text-right pr-8">
                   <h3 className="text-xl font-semibold text-blue-400">1994</h3>
@@ -91,14 +86,12 @@ const LandingPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            
             {/* Event 2 */}
             <div className="relative">
               <div className="flex items-center justify-center">
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-blue-500 rounded-full"></div>
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-8 h-8 bg-blue-500 bg-opacity-30 rounded-full animate-ping"></div>
               </div>
-              
               <div className="ml-8 md:ml-0 md:grid md:grid-cols-2 md:gap-8">
                 <div className="hidden md:block md:text-right pr-8">
                   <h3 className="text-xl font-semibold text-blue-400">2019</h3>
@@ -110,14 +103,12 @@ const LandingPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            
             {/* Event 3 */}
             <div className="relative">
               <div className="flex items-center justify-center">
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-indigo-500 rounded-full"></div>
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-8 h-8 bg-indigo-500 bg-opacity-30 rounded-full animate-ping"></div>
               </div>
-              
               <div className="ml-8 md:ml-0 md:grid md:grid-cols-2 md:gap-8">
                 <div className="hidden md:block md:text-right pr-8">
                   <h3 className="text-xl font-semibold text-blue-400">Today</h3>
@@ -129,14 +120,12 @@ const LandingPage: React.FC = () => {
                 </div>
               </div>
             </div>
-            
             {/* Event 4 */}
             <div className="relative">
               <div className="flex items-center justify-center">
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-red-500 rounded-full pulse-glow"></div>
                 <div className="absolute left-1/2 transform -translate-x-1/2 w-8 h-8 bg-red-500 bg-opacity-30 rounded-full animate-ping"></div>
               </div>
-              
               <div className="ml-8 md:ml-0 md:grid md:grid-cols-2 md:gap-8">
                 <div className="hidden md:block md:text-right pr-8">
                   <h3 className="text-xl font-semibold text-blue-400">Q-Day</h3>
@@ -223,8 +212,7 @@ const LandingPage: React.FC = () => {
       <footer className="py-12 bg-gray-900 bg-opacity-80">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center">
-            <img src="/images/logo-qvs.png" alt="QVS Logo" className="h-10 mr-3" />
-            <span className="text-white font-semibold">QVS Pro</span>
+            <img src="/images/logo-qvs.png" alt="QVS Logo" className="logo-qvs-footer" />
           </div>
           <div className="mt-6 md:mt-0 text-gray-400 text-sm">
             &copy; {new Date().getFullYear()} Quantum Vulnerability Scanner. All rights reserved.

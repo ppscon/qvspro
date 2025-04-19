@@ -45,16 +45,16 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
 }
 
-.logo-qvs {
-  height: 40px;
-  width: auto;
-  margin-right: 0.75rem;
+img.logo-qvs {
+  height: 160px !important;
+  width: auto !important;
+  margin-right: 0.75rem !important;
 }
 
-.logo-qvs-footer {
-  height: 30px;
-  width: auto;
-  margin-right: 0.5rem;
+img.logo-qvs-footer {
+  height: 80px !important;
+  width: auto !important;
+  margin-right: 0.5rem !important;
 }
 
 .nav-link {
