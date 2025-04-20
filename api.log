@@ -2,14 +2,37 @@
  * Environment: production
    WARNING: This is a development server. Do not use it in a production deployment.
    Use a production WSGI server instead.
- * Debug mode: on
- * Running on http://127.0.0.1:5001/ (Press CTRL+C to quit)
-/opt/homebrew/lib/python3.11/site-packages/watchdog/observers/__init__.py:78: UserWarning: Failed to import fsevents. Fall back to kqueue
-  warnings.warn("Failed to import fsevents. Fall back to kqueue")
- * Restarting with watchdog (kqueue)
- * Debugger is active!
- * Debugger PIN: 102-663-107
-/opt/homebrew/lib/python3.11/site-packages/watchdog/observers/__init__.py:78: UserWarning: Failed to import fsevents. Fall back to kqueue
-  warnings.warn("Failed to import fsevents. Fall back to kqueue")
-127.0.0.1 - - [20/Apr/2025 12:12:48] "GET /api/scan/demo HTTP/1.1" 200 -
-127.0.0.1 - - [20/Apr/2025 12:13:12] "GET /api/scan/demo HTTP/1.1" 200 -
+ * Debug mode: off
+Traceback (most recent call last):
+  File "/Users/home/Developer/qvs-pro/api/app.py", line 43, in <module>
+    app.run(debug=False, port=5001)
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/flask/app.py", line 922, in run
+    run_simple(t.cast(str, host), port, self, **options)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/werkzeug/serving.py", line 1008, in run_simple
+    inner()
+    ~~~~~^^
+  File "/opt/homebrew/lib/python3.11/site-packages/werkzeug/serving.py", line 948, in inner
+    srv = make_server(
+        hostname,
+    ...<7 lines>...
+        fd=fd,
+    )
+  File "/opt/homebrew/lib/python3.11/site-packages/werkzeug/serving.py", line 780, in make_server
+    return ThreadedWSGIServer(
+        host, port, app, request_handler, passthrough_errors, ssl_context, fd=fd
+    )
+  File "/opt/homebrew/lib/python3.11/site-packages/werkzeug/serving.py", line 686, in __init__
+    super().__init__(server_address, handler)  # type: ignore
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 48] Address already in use

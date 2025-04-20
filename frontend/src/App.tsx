@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiSun, FiMoon, FiSearch, FiUpload, FiFile, FiFolder, FiTrash2, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
+import { FiSun, FiMoon, FiSearch, FiUpload, FiFile, FiFolder, FiTrash2, FiAlertTriangle, FiCheckCircle, FiWifi, FiHelpCircle } from 'react-icons/fi';
 import { BrowserRouter as Router, Switch, Route, Link, Redirect, useHistory } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import QuantumRiskAssessment from './components/QuantumRiskAssessment';
@@ -12,19 +12,23 @@ import QuantumGlossary from './components/QuantumGlossary';
 import SignOutButton from './components/SignOutButton';
 import QuantumQuiz from './components/QuantumQuiz';
 import RoadmapTracker from './components/RoadmapTracker';
+import NetworkTrafficAnalyzer from './components/NetworkTrafficAnalyzer';
 import Login from './pages/Login';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
+import ScanView from './pages/ScanView';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+import ScanCompare from './pages/ScanCompare';
 import { useAuth } from './hooks/useAuth';
 import { supabase } from './lib/supabase';
+import HelpCenter from './components/HelpCenter';
 
 // Full scanner app component
 const ScannerApp: React.FC = () => {
   // State variables
   const [darkMode, setDarkMode] = useState(false);
-  const [scanType, setScanType] = useState<'file' | 'directory'>('file');
+  const [scanType, setScanType] = useState<'file' | 'directory' | 'network'>('file');
   const [files, setFiles] = useState<File[]>([]);
   // Keep the directory state for future implementation
   const [directory, setDirectory] = useState<string | null>(null); // eslint-disable-line @typescript-eslint/no-unused-vars
@@ -34,6 +38,7 @@ const ScannerApp: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState<string>('Ready to scan');
   const { user } = useAuth();
   const history = useHistory();
+  const [helpVisible, setHelpVisible] = useState<boolean>(false);
 
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -44,6 +49,26 @@ const ScannerApp: React.FC = () => {
       history.push('/login');
     }
   }, [user, history]);
+
+  // Load saved scan data if available
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('restore') === 'true') {
+      const savedScanData = sessionStorage.getItem('restoredScanData');
+      if (savedScanData) {
+        try {
+          const data = JSON.parse(savedScanData);
+          setScanResults(data);
+          setStatusMessage('Saved scan data loaded successfully');
+          // Clear the saved data
+          sessionStorage.removeItem('restoredScanData');
+        } catch (err) {
+          console.error('Error parsing saved scan data:', err);
+          setError('Failed to load saved scan data');
+        }
+      }
+    }
+  }, []);
 
   // Initialize theme based on user preference
   useEffect(() => {
@@ -72,14 +97,14 @@ const ScannerApp: React.FC = () => {
   };
 
   // Toggle between file and directory scan types
-  const toggleScanType = (type: 'file' | 'directory') => {
+  const toggleScanType = (type: 'file' | 'directory' | 'network') => {
     setScanType(type);
     // Clear previous selections and results
     setFiles([]);
     setDirectory(null);
     setScanResults(null);
     setError(null);
-    setStatusMessage(`Ready to scan ${type === 'file' ? 'files' : 'directory'}`);
+    setStatusMessage(`Ready to scan ${type === 'file' ? 'files' : type === 'directory' ? 'directory' : 'network traffic'}`);
   };
 
   // Trigger file input click
@@ -415,6 +440,13 @@ const ScannerApp: React.FC = () => {
             <Link to="/profile" className="nav-link">
               Profile
             </Link>
+            <button 
+              onClick={() => setHelpVisible(true)} 
+              className="text-white hover:text-gray-300 flex items-center"
+              aria-label="Help"
+            >
+              <FiHelpCircle className="mr-1" /> Help
+            </button>
             <SignOutButton className="nav-link" />
             <button
               type="button"
@@ -443,7 +475,7 @@ const ScannerApp: React.FC = () => {
           <div className="mb-4">
             <h2 className="heading">Quantum Vulnerability Scanner</h2>
             <p className="subheading">
-              Scan your codebase for cryptographic algorithms vulnerable to quantum computing attacks
+              Scan your codebase and network traffic for cryptographic vulnerabilities to quantum computing attacks
             </p>
           </div>
 
@@ -474,6 +506,17 @@ const ScannerApp: React.FC = () => {
               </button>
               <button
                 type="button"
+                onClick={() => toggleScanType('network')}
+                className={`flex items-center px-4 py-2 rounded-md ${scanType === 'network'
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                  }`}
+              >
+                <FiWifi className="mr-2" />
+                Network Scan
+              </button>
+              <button
+                type="button"
                 onClick={handleDemoScan}
                 className="flex items-center px-4 py-2 rounded-md bg-yellow-400 text-gray-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-300"
                 title="Try a demo scan using built-in quantum-vulnerable test files."
@@ -486,128 +529,138 @@ const ScannerApp: React.FC = () => {
             </div>
 
             {/* File/Directory Selection */}
-            <div className="mb-6">
-              {scanType === 'file' ? (
-                <div className="flex flex-col">
-                  <div
-                    className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-primary dark:hover:border-primary"
-                    onClick={triggerFileInput}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      multiple
-                      className="hidden"
-                      onChange={handleFileChange}
-                    />
-                    <FiUpload className="mx-auto mb-4 text-gray-400 dark:text-gray-600" size={32} />
-                    <p className="text-gray-600 dark:text-gray-400 mb-2">
-                      {files.length > 0
-                        ? `${files.length} file(s) selected`
-                        : 'Click to select or drag and drop files here'}
-                    </p>
-                    <button
-                      type="button"
-                      className="mt-2 px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-dark"
-                    >
-                      Select Files
-                    </button>
-                  </div>
-
-                  {files.length > 0 && (
-                    <div className="mt-4">
-                      <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Selected Files:</h3>
-                      <div className="max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50 dark:bg-gray-800">
-                        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-                          {Array.from(files).map((file, index) => (
-                            <li key={index} className="py-2 flex items-center justify-between">
-                              <div className="flex items-center">
-                                <span className="mr-2">{getFileTypeLabel(file)}</span>
-                                <span className="text-gray-700 dark:text-gray-300">{file.name}</span>
-                              </div>
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
-                                {(file.size / 1024).toFixed(1)} KB
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
+            {scanType === 'file' && (
+              <div className="mb-6">
                 <div
-                  className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center cursor-not-allowed opacity-60"
+                  className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-primary dark:hover:border-primary"
+                  onClick={triggerFileInput}
                 >
-                  <FiFolder className="mx-auto mb-4 text-gray-400 dark:text-gray-600" size={32} />
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                  <FiUpload className="mx-auto mb-4 text-gray-400 dark:text-gray-600" size={32} />
                   <p className="text-gray-600 dark:text-gray-400 mb-2">
-                    Directory scanning coming soon!
+                    {files.length > 0
+                      ? `${files.length} file(s) selected`
+                      : 'Click to select or drag and drop files here'}
                   </p>
+                  <button
+                    type="button"
+                    className="mt-2 px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-dark"
+                  >
+                    Select Files
+                  </button>
                 </div>
-              )}
-            </div>
 
-            {/* Action Buttons */}
-            <div className="flex space-x-4">
-              <button
-                type="button"
-                onClick={handleScan}
-                disabled={isLoading || (scanType === 'file' && files.length === 0)}
-                className="flex-1 flex justify-center items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Scanning...
-                  </>
-                ) : (
-                  <>
-                    <FiSearch className="mr-2" />
-                    Scan for Vulnerabilities
-                  </>
+                {files.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Selected Files:</h3>
+                    <div className="max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50 dark:bg-gray-800">
+                      <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                        {Array.from(files).map((file, index) => (
+                          <li key={index} className="py-2 flex items-center justify-between">
+                            <div className="flex items-center">
+                              <span className="mr-2">{getFileTypeLabel(file)}</span>
+                              <span className="text-gray-700 dark:text-gray-300">{file.name}</span>
+                            </div>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {(file.size / 1024).toFixed(1)} KB
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 )}
-              </button>
-              <button
-                type="button"
-                onClick={handleReset}
-                disabled={isLoading}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FiTrash2 />
-              </button>
-            </div>
+              </div>
+            )}
 
-            {/* Status Message */}
-            <div className="mt-6 text-center">
-              <p
-                className={`py-2 px-3 rounded-md inline-block text-sm ${error
-                    ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    : isLoading
-                      ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                      : scanResults
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                  }`}
+            {scanType === 'directory' && (
+              <div
+                className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center cursor-not-allowed opacity-60 mb-6"
               >
-                {error ? (
-                  <span className="flex items-center">
-                    <FiAlertTriangle className="mr-2" /> {error}
-                  </span>
-                ) : (
-                  <span className="flex items-center">
-                    {scanResults && !isLoading && <FiCheckCircle className="mr-2" />}
-                    {statusMessage}
-                  </span>
-                )}
-              </p>
-            </div>
+                <FiFolder className="mx-auto mb-4 text-gray-400 dark:text-gray-600" size={32} />
+                <p className="text-gray-600 dark:text-gray-400 mb-2">
+                  Directory scanning coming soon!
+                </p>
+              </div>
+            )}
+
+            {scanType === 'network' && (
+              <div className="mb-6">
+                <NetworkTrafficAnalyzer darkMode={darkMode} />
+              </div>
+            )}
+
+            {/* Action Buttons - Only show for file/directory scans */}
+            {scanType !== 'network' && (
+              <div className="flex space-x-4">
+                <button
+                  type="button"
+                  onClick={handleScan}
+                  disabled={isLoading || (scanType === 'file' && files.length === 0)}
+                  className="flex-1 flex justify-center items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Scanning...
+                    </>
+                  ) : (
+                    <>
+                      <FiSearch className="mr-2" />
+                      Scan for Vulnerabilities
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  disabled={isLoading}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FiTrash2 />
+                </button>
+              </div>
+            )}
+
+            {/* Status Message - Only show for file/directory scans */}
+            {scanType !== 'network' && (
+              <div className="mt-6 text-center">
+                <p
+                  className={`py-2 px-3 rounded-md inline-block text-sm ${error
+                      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      : isLoading
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                        : scanResults
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
+                    }`}
+                >
+                  {error ? (
+                    <span className="flex items-center">
+                      <FiAlertTriangle className="mr-2" /> {error}
+                    </span>
+                  ) : (
+                    <span className="flex items-center">
+                      {scanResults && !isLoading && <FiCheckCircle className="mr-2" />}
+                      {statusMessage}
+                    </span>
+                  )}
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Scan Results */}
-          {scanResults && (
+          {/* Scan Results - Only show for file/directory scans */}
+          {scanResults && scanType !== 'network' && (
             <div className="section p-6 mt-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Scan Results</h2>
@@ -753,6 +806,14 @@ const ScannerApp: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Help Center */}
+      {helpVisible && (
+        <HelpCenter 
+          darkMode={darkMode} 
+          onClose={() => setHelpVisible(false)} 
+        />
+      )}
     </div>
   );
 };
@@ -785,6 +846,12 @@ const App: React.FC = () => {
         <Route path="/education/quiz" component={QuantumQuiz} />
         <ProtectedRoute path="/internal/roadmap">
           <RoadmapTracker />
+        </ProtectedRoute>
+        <ProtectedRoute path="/scan/:id">
+          <ScanView />
+        </ProtectedRoute>
+        <ProtectedRoute path="/compare/:scan1Id/:scan2Id">
+          <ScanCompare />
         </ProtectedRoute>
         <Redirect to="/" />
       </Switch>

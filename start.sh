@@ -62,7 +62,7 @@ cd "$API_DIR"
 
 # Check if Python 3 is available
 if command -v python3 &> /dev/null; then
-  python3 app.py > "$PROJECT_DIR/api.log" 2>&1 &
+  FLASK_DEBUG=0 python3 app.py > "$PROJECT_DIR/api.log" 2>&1 &
   API_PID=$!
   echo "API server started with PID: $API_PID"
   echo "API logs being written to $PROJECT_DIR/api.log"

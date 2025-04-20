@@ -27,6 +27,7 @@ export interface ScanRecord {
   updated_at: string;
   scan_parameters: any;
   status: 'pending' | 'running' | 'completed' | 'failed';
+  results?: any;
 }
 
 // Scan finding types

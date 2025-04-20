@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { FiUser, FiSettings, FiShield, FiList, FiLogOut, FiPlus, FiUserPlus } from 'react-icons/fi';
+import { Link, useHistory } from 'react-router-dom';
+import { FiUser, FiSettings, FiShield, FiList, FiLogOut, FiPlus, FiCheck, FiUserPlus } from 'react-icons/fi';
+import { BiGitCompare } from 'react-icons/bi';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { ScanRecord } from '../types';
@@ -10,6 +11,9 @@ const Dashboard: React.FC = () => {
   const [scanRecords, setScanRecords] = useState<ScanRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedScans, setSelectedScans] = useState<string[]>([]);
+  const history = useHistory();
 
   useEffect(() => {
     if (user) {
@@ -35,6 +39,27 @@ const Dashboard: React.FC = () => {
       setError('Failed to load scan history');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleScanSelection = (scanId: string) => {
+    setSelectedScans(prevSelected => {
+      if (prevSelected.includes(scanId)) {
+        return prevSelected.filter(id => id !== scanId);
+      } else {
+        // Only allow two scans to be selected at once
+        if (prevSelected.length < 2) {
+          return [...prevSelected, scanId];
+        }
+        // If already have 2 selected, replace the oldest selection
+        return [prevSelected[1], scanId];
+      }
+    });
+  };
+
+  const compareScans = () => {
+    if (selectedScans.length === 2) {
+      history.push(`/compare/${selectedScans[0]}/${selectedScans[1]}`);
     }
   };
 
@@ -147,12 +172,38 @@ const Dashboard: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">
               Recent Scans
             </h3>
-            <Link 
-              to="/app" 
-              className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-            >
-              <FiPlus className="mr-1" /> New Scan
-            </Link>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => {
+                  setCompareMode(!compareMode);
+                  if (!compareMode) {
+                    setSelectedScans([]);
+                  }
+                }}
+                className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md 
+                  ${compareMode 
+                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+              >
+                <BiGitCompare className="mr-1" /> {compareMode ? 'Cancel Compare' : 'Compare Scans'}
+              </button>
+              
+              {compareMode && selectedScans.length === 2 && (
+                <button
+                  onClick={compareScans}
+                  className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md bg-green-600 text-white hover:bg-green-700"
+                >
+                  Compare Selected
+                </button>
+              )}
+              
+              <Link 
+                to="/app" 
+                className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+              >
+                <FiPlus className="mr-1" /> New Scan
+              </Link>
+            </div>
           </div>
           
           {loading ? (
@@ -177,6 +228,11 @@ const Dashboard: React.FC = () => {
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
+                    {compareMode && (
+                      <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        Select
+                      </th>
+                    )}
                     <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Name
                     </th>
@@ -193,12 +249,35 @@ const Dashboard: React.FC = () => {
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {scanRecords.map((record) => (
-                    <tr key={record.id}>
+                    <tr key={record.id} className={compareMode && selectedScans.includes(record.id) ? 'bg-blue-50 dark:bg-blue-900/20' : ''}>
+                      {compareMode && (
+                        <td className="px-3 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => toggleScanSelection(record.id)}
+                            className={`w-6 h-6 rounded flex items-center justify-center ${
+                              selectedScans.includes(record.id)
+                                ? 'bg-blue-500 text-white'
+                                : 'border border-gray-300 dark:border-gray-600 text-gray-400'
+                            }`}
+                          >
+                            {selectedScans.includes(record.id) && <FiCheck size={14} />}
+                          </button>
+                        </td>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">{record.name}</div>
-                        {record.description && (
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{record.description}</div>
-                        )}
+                        <Link 
+                          to={`/scan/${record.id}`}
+                          className="block"
+                        >
+                          <div className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
+                            {record.name}
+                          </div>
+                          {record.description && (
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {record.description}
+                            </div>
+                          )}
+                        </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500 dark:text-gray-400">
