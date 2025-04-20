@@ -125,7 +125,7 @@ export const Auth: React.FC<AuthProps> = ({ redirectTo = '/app' }) => {
                     name="password"
                     type="password"
                     autoComplete={mode === 'signUp' ? 'new-password' : 'current-password'}
-                    required={mode !== 'resetPassword'}
+                    required={mode === 'signIn' || mode === 'signUp'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 block w-full py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiUser, FiSettings, FiShield, FiList, FiLogOut, FiPlus } from 'react-icons/fi';
+import { FiUser, FiSettings, FiShield, FiList, FiLogOut, FiPlus, FiUserPlus } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { ScanRecord } from '../types';
 
 const Dashboard: React.FC = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, isAdmin } = useAuth();
   const [scanRecords, setScanRecords] = useState<ScanRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,17 +114,31 @@ const Dashboard: React.FC = () => {
             </div>
           </Link>
           
-          <Link to="/settings" className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full mr-4">
-                <FiSettings className="text-purple-600 dark:text-purple-400" size={24} />
+          {isAdmin ? (
+            <Link to="/admin" className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center">
+                <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full mr-4">
+                  <FiUserPlus className="text-purple-600 dark:text-purple-400" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Admin Dashboard</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Manage beta users and permissions</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Settings</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Configure your preferences</p>
+            </Link>
+          ) : (
+            <Link to="/settings" className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center">
+                <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full mr-4">
+                  <FiSettings className="text-purple-600 dark:text-purple-400" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Settings</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Configure your preferences</p>
+                </div>
               </div>
-            </div>
-          </Link>
+            </Link>
+          )}
         </div>
 
         {/* Recent Scans */}

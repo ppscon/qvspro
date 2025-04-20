@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCpu, FiActivity, FiLock, FiKey, FiFileText, FiSun, FiMoon } from 'react-icons/fi';
+import { FiCpu, FiActivity, FiLock, FiKey, FiFileText, FiSun, FiMoon, FiAward } from 'react-icons/fi';
 import EducationFooter from './EducationFooter';
 
 interface EducationCardProps {
@@ -110,6 +110,13 @@ const QuantumEducationHub: React.FC = () => {
               description="Key terms and concepts explained for beginners to advanced users."
               icon={<FiFileText className="w-8 h-8" />}
               path="/education/glossary"
+            />
+            
+            <EducationCard 
+              title="Quantum Computing Quiz"
+              description="Test your knowledge with our comprehensive quiz on quantum computing and cryptography."
+              icon={<FiAward className="w-8 h-8" />}
+              path="/education/quiz"
             />
           </div>
           

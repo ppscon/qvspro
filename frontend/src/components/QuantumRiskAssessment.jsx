@@ -4,7 +4,7 @@
 // - All table rows and mapped children must have a unique key prop
 // - Never render React elements or arrays directly as table cell values
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 
 // Simple Search icon SVG component (no external dependencies)
@@ -75,24 +75,10 @@ const VULN_CATEGORY_COLORS = {
 };
 
 function safeCell(val) {
-  if (val == null) return '';
-  if (Array.isArray(val)) return val.map(safeCell).join(', ');
-  if (React.isValidElement(val)) {
-    // Debug log for React elements in data
-    // eslint-disable-next-line no-console
-    console.warn('React element found in scan result field:', val);
-    return '[React Element]';
-  }
-  if (typeof val === 'object') {
-    // Handle error objects from sanitization
-    if (val.error) {
-      console.warn('Error object found in scan result field:', val);
-      return val.data ? `Error: ${val.error} (${val.data})` : `Error: ${val.error}`;
-    }
-    // Debug log for objects in data
-    // eslint-disable-next-line no-console
-    console.warn('Object found in scan result field:', val);
-    return JSON.stringify(val);
+  console.log('[safeCell] Input:', val, '(type:', typeof val, ')'); // Keep logging
+  // Return value directly if it exists, otherwise return empty string
+  if (val == null || val === undefined || val === '') {
+    return '';
   }
   return String(val);
 }
@@ -104,61 +90,212 @@ function uniqueRowKey(f, i) {
 
 // Main component
 const QuantumRiskAssessment = ({ findings }) => {
-  const [results] = useState(findings || []);
-  const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState('overview');
+  // console.log('QuantumRiskAssessment received findings:', findings); // REMOVE LOG
+  
+  // State for search and filtering
   const [showFilters, setShowFilters] = useState(false);
+  const [search, setSearch] = useState('');
   const [riskFilter, setRiskFilter] = useState('all');
   const [algorithmFilter, setAlgorithmFilter] = useState('all');
+  const [darkMode, setDarkMode] = useState(false);
+  
+  // State for filtered findings
+  const [filteredResults, setFilteredResults] = useState([]);
+  
+  useEffect(() => {
+    // Check if dark mode is enabled in the document
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    setDarkMode(isDarkMode);
+    
+    // Listen for changes to the dark mode class
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          setDarkMode(document.documentElement.classList.contains('dark'));
+        }
+      });
+    });
+    
+    observer.observe(document.documentElement, { attributes: true });
+    
+    return () => observer.disconnect();
+  }, []);
+  
+  // Process and sanitize the findings data
+  const results = useMemo(() => {
+    // Handle different formats of input data
+    let findingsArray = [];
+    
+    if (!findings) {
+      console.warn('No findings data provided');
+      return [];
+    }
+    
+    // Handle both formats: direct array or {results: [...]} object
+    if (Array.isArray(findings)) {
+      findingsArray = findings;
+    } else if (findings.results && Array.isArray(findings.results)) {
+      findingsArray = findings.results;
+    } else {
+      console.warn('Findings data is not in expected format', findings);
+      return [];
+    }
+    
+    try {
+      // Sanitize and ensure data consistency
+      return findingsArray.map(item => {
+        // Ensure item is an object
+        if (typeof item !== 'object' || item === null) {
+          return {
+            file: 'N/A',
+            line: 'N/A',
+            risk: 'Unknown',
+            vulnerability: 'Unknown',
+            description: 'No description provided',
+            recommendation: 'No recommendation provided'
+          };
+        }
+        
+        // The key properties from the backend may have different names
+        // Check multiple possible property names with specific fallbacks
+        return {
+          file: item.file || item.file_path || 'N/A',
+          line: item.line || item.line_number || 'N/A',
+          risk: item.risk || item.risk_level || 'Unknown',
+          vulnerability: item.type || item.vulnerability_type || item.vulnerability || 'Unknown',
+          algorithm: item.algorithm || item.algorithm_name || 'Unknown',
+          method: item.method || '',
+          description: item.description || `${item.algorithm || ''} ${item.method || ''} vulnerability` || 'No description provided',
+          recommendation: item.recommendation || (item.risk === 'High' ? 
+            'Replace with post-quantum cryptography algorithm' : 
+            item.risk === 'Medium' ? 
+            'Plan to upgrade to stronger cryptography' : 
+            'Monitor for vulnerabilities') || 'No recommendation provided'
+        };
+      });
+    } catch (error) {
+      console.error('Error processing findings:', error);
+      return [];
+    }
+  }, [findings]);
 
   // Filtered findings
-  const filtered = useMemo(() => {
-    return results.filter(f => {
-      // Text search
-      const matchesSearch = 
-        safeCell(f.algorithm).toLowerCase().includes(search.toLowerCase()) ||
-        safeCell(f.risk).toLowerCase().includes(search.toLowerCase()) ||
-        safeCell(f.file_path || f.file).toLowerCase().includes(search.toLowerCase()) ||
-        safeCell(f.vulnerability_type).toLowerCase().includes(search.toLowerCase());
-      
-      // Risk level filter
-      const matchesRisk = riskFilter === 'all' || 
-        safeCell(f.risk).toLowerCase() === riskFilter.toLowerCase();
-      
-      // Algorithm filter
-      const algo = safeCell(f.algorithm_name || f.algorithm || '').toLowerCase();
-      const matchesAlgorithm = algorithmFilter === 'all' || 
-        algo.includes(algorithmFilter.toLowerCase());
-      
-      return matchesSearch && matchesRisk && matchesAlgorithm;
-    });
+  useEffect(() => {
+    let filtered = [...results];
+    
+    if (search) {
+      const lowercaseSearch = search.toLowerCase();
+      filtered = filtered.filter(item => {
+        return (
+          (item.file && item.file.toLowerCase().includes(lowercaseSearch)) ||
+          (item.algorithm && item.algorithm.toLowerCase().includes(lowercaseSearch)) ||
+          (item.description && item.description.toLowerCase().includes(lowercaseSearch)) ||
+          (item.recommendation && item.recommendation.toLowerCase().includes(lowercaseSearch))
+        );
+      });
+    }
+    
+    if (riskFilter !== 'all') {
+      filtered = filtered.filter(item => item.risk && item.risk.toLowerCase() === riskFilter.toLowerCase());
+    }
+    
+    if (algorithmFilter !== 'all') {
+      filtered = filtered.filter(item => item.algorithm && item.algorithm === algorithmFilter);
+    }
+    
+    setFilteredResults(filtered);
   }, [results, search, riskFilter, algorithmFilter]);
 
-  // Risk level data for pie chart
-  const riskData = [
-    { name: 'High', value: results.filter(r => safeCell(r.risk).toLowerCase() === 'high').length },
-    { name: 'Medium', value: results.filter(r => safeCell(r.risk).toLowerCase() === 'medium').length },
-    { name: 'Low', value: results.filter(r => safeCell(r.risk).toLowerCase() === 'low').length },
-  ].filter(d => typeof d.value === 'number' && !isNaN(d.value));
+  // Risk distribution data
+  const riskData = useMemo(() => {
+    const riskCounts = {};
+    results.forEach(item => {
+      const risk = item.risk || 'Unknown';
+      riskCounts[risk] = (riskCounts[risk] || 0) + 1;
+    });
+    
+    return Object.entries(riskCounts).map(([name, value]) => ({ name, value }));
+  }, [results]);
   
+  // Unique algorithms
+  const uniqueAlgorithms = useMemo(() => {
+    const algorithms = new Set();
+    results.forEach(item => {
+      if (item.algorithm && typeof item.algorithm === 'string') {
+        algorithms.add(item.algorithm);
+      }
+    });
+    return Array.from(algorithms);
+  }, [results]);
+  
+  // Algorithm hotspots data
+  const algoData = useMemo(() => {
+    const algoCounts = {};
+    results.forEach(item => {
+      const algo = item.algorithm || 'Unknown';
+      algoCounts[algo] = (algoCounts[algo] || 0) + 1;
+    });
+    return Object.entries(algoCounts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5); // Top 5 algorithms
+  }, [results]);
+
+  // Calculate chart data using useMemo based on the processed results
+  const pieChartData = useMemo(() => {
+    const categories = {};
+    results.forEach(finding => {
+      const type = finding.algorithm || 'Unknown'; // Use the algorithm field consistently
+      categories[type] = (categories[type] || 0) + 1;
+    });
+    // Ensure at least 3 categories for visualization (optional, adjust as needed)
+    if (Object.keys(categories).length < 3) {
+      if (!categories["RSA"]) categories["RSA"] = 0;
+      if (!categories["AES-128"]) categories["AES-128"] = 0;
+      if (!categories["ECC"]) categories["ECC"] = 0;
+    }
+    return Object.entries(categories).map(([name, value]) => ({ name, value }));
+  }, [results]);
+
+  const barChartData = useMemo(() => {
+    // Use algoData directly as it's already calculated with useMemo
+    return algoData;
+  }, [algoData]);
+
+  // Risk level data for pie chart
   const hasRiskData = riskData.some(d => d.value > 0);
 
   // Algorithm data for bar chart
-  const algoCounts = {};
-  results.forEach(r => {
-    const algo = safeCell(r.algorithm_name || r.algorithm || 'Unknown');
-    algoCounts[algo] = (algoCounts[algo] || 0) + 1;
-  });
-  const algoData = Object.entries(algoCounts)
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value) // Sort by frequency
-    .slice(0, 5) // Top 5 algorithms
-    .filter(d => typeof d.value === 'number' && !isNaN(d.value));
-  
   const hasAlgoData = algoData.length > 0 && algoData.some(d => d.value > 0);
 
+  // Vulnerability categories
+  const vulnTypes = useMemo(() => {
+    const types = {};
+    results.forEach(item => {
+      const type = item.vulnerability || 'Unknown';
+      types[type] = (types[type] || 0) + 1;
+    });
+    return types;
+  }, [results]);
+  
+  // Executive summary metrics
+  const totalVulnerabilities = results.length;
+  
+  const highRiskCount = useMemo(() => 
+    results.filter(item => item.risk && item.risk.toLowerCase() === 'high').length,
+  [results]);
+  
+  const highRiskPercentage = useMemo(() => 
+    totalVulnerabilities > 0 ? Math.round((highRiskCount / totalVulnerabilities) * 100) : 0,
+  [highRiskCount, totalVulnerabilities]);
+  
+  const mostCommonAlgo = useMemo(() => {
+    if (algoData.length === 0) return 'None Found';
+    return algoData[0].name;
+  }, [algoData]);
+
   // Vulnerability types - redesigned to better categorize
-  const vulnTypes = {};
+  const vulnTypesRedesigned = {};
   results.forEach(r => {
     // Determine vulnerability type with improved categorization
     let vulnType = safeCell(r.vulnerability_type);
@@ -178,21 +315,21 @@ const QuantumRiskAssessment = ({ findings }) => {
       }
     }
     
-    vulnTypes[vulnType] = (vulnTypes[vulnType] || 0) + 1;
+    vulnTypesRedesigned[vulnType] = (vulnTypesRedesigned[vulnType] || 0) + 1;
   });
   
   // Ensure we have at least 3 categories even with demo data
-  if (Object.keys(vulnTypes).length < 3) {
-    if (!vulnTypes["Shor's Algorithm"]) vulnTypes["Shor's Algorithm"] = 0;
-    if (!vulnTypes["Grover's Algorithm"]) vulnTypes["Grover's Algorithm"] = 0;
-    if (!vulnTypes["Symmetric Key"]) vulnTypes["Symmetric Key"] = 0;
+  if (Object.keys(vulnTypesRedesigned).length < 3) {
+    if (!vulnTypesRedesigned["Shor's Algorithm"]) vulnTypesRedesigned["Shor's Algorithm"] = 0;
+    if (!vulnTypesRedesigned["Grover's Algorithm"]) vulnTypesRedesigned["Grover's Algorithm"] = 0;
+    if (!vulnTypesRedesigned["Symmetric Key"]) vulnTypesRedesigned["Symmetric Key"] = 0;
   }
   
   // Prepare radar data
-  const radarData = Object.keys(vulnTypes).map(type => ({
+  const radarData = Object.keys(vulnTypesRedesigned).map(type => ({
     subject: type,
-    A: vulnTypes[type],
-    fullMark: Math.max(...Object.values(vulnTypes))
+    A: vulnTypesRedesigned[type],
+    fullMark: Math.max(...Object.values(vulnTypesRedesigned))
   }));
 
   // Time projection data (simulated)
@@ -203,15 +340,6 @@ const QuantumRiskAssessment = ({ findings }) => {
     { name: '5 years', risk: 175 },
     { name: '10 years', risk: 240 },
   ];
-
-  // Algorithm distribution by type
-  const uniqueAlgorithms = [...new Set(results.map(r => safeCell(r.algorithm_name || r.algorithm)))];
-
-  // Executive summary
-  const mostCommonAlgo = algoData.length > 0 ? algoData[0].name : 'N/A';
-  const totalVulnerabilities = results.length;
-  const highRiskCount = riskData[0]?.value || 0;
-  const highRiskPercentage = totalVulnerabilities > 0 ? Math.round((highRiskCount / totalVulnerabilities) * 100) : 0;
 
   // Export to PDF (placeholder function)
   const exportToPDF = () => {
@@ -224,7 +352,7 @@ const QuantumRiskAssessment = ({ findings }) => {
     const headers = ['File', 'Algorithm', 'Risk', 'Vulnerability Type', 'Line', 'Description', 'Recommendation'];
     const csvContent = [
       headers.join(','),
-      ...filtered.map(f => [
+      ...filteredResults.map(f => [
         safeCell(f.file_path || f.file),
         safeCell(f.algorithm_name || f.algorithm),
         safeCell(f.risk),
@@ -245,8 +373,13 @@ const QuantumRiskAssessment = ({ findings }) => {
     document.body.removeChild(link);
   };
 
+  // Log debug info at render time - useful for debugging
+  console.log('[Render Scope] filteredResults:', filteredResults);
+  console.log('Table data:', filteredResults);
+
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-6">
+      {/* Header Section */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Quantum Risk Assessment</h2>
         <div className="flex space-x-2">
@@ -341,276 +474,114 @@ const QuantumRiskAssessment = ({ findings }) => {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="-mb-px flex space-x-6">
-          <button 
-            onClick={() => setActiveTab('overview')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'overview' 
-                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
-          >
-            Overview
-          </button>
-          <button 
-            onClick={() => setActiveTab('trends')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'trends' 
-                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
-          >
-            Risk Trends
-          </button>
-          <button 
-            onClick={() => setActiveTab('findings')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'findings' 
-                ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
-          >
-            Detailed Findings
-          </button>
-        </nav>
-      </div>
-
-      {/* Tab content */}
+      {/* Always render the findings section */} 
       <div className="pt-2">
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Charts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-                <h3 className="font-semibold mb-4">Risk Level Distribution</h3>
-                {hasRiskData ? (
-                  <div className="flex justify-center">
-                    <PieChart width={250} height={250}>
-                      <Pie 
-                        data={riskData} 
-                        dataKey="value" 
-                        nameKey="name" 
-                        cx="50%" 
-                        cy="50%" 
-                        outerRadius={100}
-                        label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {riskData.map((entry, idx) => (
-                          <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => [`${value} findings`]} />
-                    </PieChart>
-                  </div>
-                ) : (
-                  <div className="text-gray-400 text-sm flex items-center justify-center h-64">
-                    No risk data to display.
-                  </div>
-                )}
-              </div>
-              
-              <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-                <h3 className="font-semibold mb-4">Algorithm Hotspots</h3>
-                {hasAlgoData ? (
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={algoData} margin={{ left: 0, right: 20, top: 10, bottom: 60 }}>
-                      <XAxis 
-                        dataKey="name" 
-                        tick={{ fontSize: 12 }} 
-                        interval={0} 
-                        angle={-45} 
-                        textAnchor="end" 
-                        height={60} 
-                      />
-                      <YAxis allowDecimals={false} />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#6366f1" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="text-gray-400 text-sm flex items-center justify-center h-64">
-                    No algorithm data to display.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-                <h3 className="font-semibold mb-4">Vulnerability Categories</h3>
-                {Object.keys(vulnTypes).length > 0 ? (
-                  <div className="space-y-4">
-                    {/* Visual category bars */}
-                    <div className="space-y-3">
-                      {Object.entries(vulnTypes)
-                        .sort(([, a], [, b]) => b - a) // Sort by count (descending)
-                        .map(([type, count]) => {
-                          const total = results.length;
-                          const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
-                          const colorInfo = VULN_CATEGORY_COLORS[type] || { bg: '#6366f1', text: '#ffffff' };
-                          
-                          return (
-                            <div key={type} className="space-y-1">
-                              <div className="flex justify-between items-center">
-                                <div className="flex items-center">
-                                  <span 
-                                    className="inline-block w-3 h-3 rounded-full mr-2" 
-                                    style={{ backgroundColor: colorInfo.bg }}
-                                  ></span>
-                                  <span className="text-sm font-medium">{type}</span>
-                                </div>
-                                <span className="text-sm text-gray-500">{count} ({percentage}%)</span>
-                              </div>
-                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                                <div 
-                                  className="h-2.5 rounded-full" 
-                                  style={{ 
-                                    width: `${percentage}%`, 
-                                    backgroundColor: colorInfo.bg 
-                                  }}
-                                ></div>
-                              </div>
-                            </div>
-                          );
-                        })
-                      }
-                    </div>
-                    
-                    {/* Distribution chart */}
-                    <div className="mt-6">
-                      <ResponsiveContainer width="100%" height={200}>
-                        <PieChart>
-                          <Pie 
-                            data={Object.entries(vulnTypes).map(([name, value]) => ({ name, value }))}
-                            dataKey="value" 
-                            nameKey="name" 
-                            cx="50%" 
-                            cy="50%" 
-                            outerRadius={80}
-                            innerRadius={40}
-                          >
-                            {Object.keys(vulnTypes).map((entry, index) => (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={VULN_CATEGORY_COLORS[entry]?.bg || RADAR_COLORS[index % RADAR_COLORS.length]} 
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip 
-                            formatter={(value, name) => [
-                              `${value} (${Math.round((value / results.length) * 100)}%)`, 
-                              name
-                            ]} 
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-gray-400 text-sm flex items-center justify-center h-64">
-                    No vulnerability category data to display.
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-                <h3 className="font-semibold mb-4">Key Security Recommendations</h3>
-                <div className="space-y-3">
-                  <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded border-l-4 border-amber-500">
-                    <p className="font-medium">Migrate from RSA to Post-Quantum Algorithms</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Replace RSA with NIST-approved post-quantum cryptography standards like ML-KEM.</p>
-                  </div>
-                  <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded border-l-4 border-blue-500">
-                    <p className="font-medium">Increase Symmetric Key Sizes</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Ensure all symmetric keys are at least 256 bits to maintain security against Grover's algorithm.</p>
-                  </div>
-                  <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded border-l-4 border-green-500">
-                    <p className="font-medium">Implement Crypto-Agility</p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Design systems to allow easy cryptographic algorithm replacement without major refactoring.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'trends' && (
-          <div className="space-y-6">
-            <div className="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-sm">
-              <h3 className="font-semibold mb-4">Quantum Risk Projection</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                This chart projects how the risk from quantum computing will increase over time as quantum computers become more powerful.
-              </p>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={timelineData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis label={{ value: 'Relative Risk (%)', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="risk" stroke="#8884d8" activeDot={{ r: 8 }} />
-                </LineChart>
-              </ResponsiveContainer>
-              <div className="mt-4 p-3 bg-purple-50 dark:bg-purple-900/20 rounded border border-purple-200 dark:border-purple-800">
-                <p className="text-sm">
-                  <span className="font-bold">Q-Day Timeline:</span> Experts predict that within 5-10 years, quantum computers could become powerful enough to break many current cryptographic systems. Start your quantum-safe migration now.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'findings' && (
-          <div>
-            <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-              Showing {filtered.length} of {results.length} findings
-              {filtered.length !== results.length && " (filtered)"}
-            </p>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white dark:bg-gray-900 rounded shadow">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+          <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+            Showing {filteredResults.length} of {results.length} findings
+            {filteredResults.length !== results.length && " (filtered)"}
+          </p>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-100 dark:bg-gray-800">
+                <tr>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">File</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Line</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Risk</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Vulnerability</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Algorithm</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recommendation</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredResults.length === 0 ? (
                   <tr>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 uppercase">File</th>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 uppercase">Algorithm</th>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 uppercase">Risk</th>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 uppercase">Line</th>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                    <th className="p-2 text-left text-xs font-medium text-gray-500 uppercase">Recommendation</th>
+                    <td colSpan="7" className="px-3 py-4 text-center text-gray-500 dark:text-gray-400">
+                      {results.length > 0 ? 'No findings match your filters.' : 'No findings available.'}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((f, i) => {
-                    const rowKey = uniqueRowKey(f, i);
+                ) : (
+                  filteredResults.map((item, index) => { 
+                    console.log('[Table Map] Rendering row', index, ':', item);
+                    const rowKey = `finding-${index}-${item.file || ''}-${item.line || ''}`;
+                    
+                    // Determine risk class
+                    let riskClass = 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                    if (item.risk) {
+                      const risk = item.risk.toLowerCase();
+                      if (risk === 'high' || risk === 'critical') {
+                        riskClass = 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+                      } else if (risk === 'medium') {
+                        riskClass = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+                      } else if (risk === 'low') {
+                        riskClass = 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+                      }
+                    }
+                    
+                    // Generate description and recommendation explicitly to avoid issues
+                    let description = 'No description available';
+                    if (item.description && item.description !== 'No description provided') {
+                      description = item.description;
+                    } else if (item.algorithm || item.method) {
+                      description = `${item.algorithm || ''} ${item.method || ''} vulnerability`.trim();
+                    }
+                    
+                    let recommendation = 'No recommendation available';
+                    if (item.recommendation && item.recommendation !== 'No recommendation provided') {
+                      recommendation = item.recommendation;
+                    } else if (item.risk) {
+                      if (item.risk === 'High' || item.risk === 'Critical') {
+                        recommendation = 'Replace with post-quantum cryptography algorithm';
+                      } else if (item.risk === 'Medium') {
+                        recommendation = 'Plan to upgrade to stronger cryptography';
+                      } else {
+                        recommendation = 'Monitor for vulnerabilities';
+                      }
+                    }
+
+                    // For debugging
+                    console.log(`Row ${index}:`, {
+                      file: item.file || item.file_path || 'N/A', 
+                      line: item.line || item.line_number || 'N/A',
+                      risk: item.risk || 'Unknown',
+                      vulnerability: item.vulnerability || item.type || item.vulnerability_type || 'Unknown',
+                      algorithm: item.algorithm || item.algorithm_name || 'Unknown',
+                      description,
+                      recommendation
+                    });
+
                     return (
-                      <tr key={rowKey} className="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer border-t border-gray-200 dark:border-gray-700">
-                        <td className="p-2">{safeCell(f.file_path || f.file)}</td>
-                        <td className="p-2">{safeCell(f.algorithm_name || f.algorithm)}</td>
-                        <td className="p-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            safeCell(f.risk).toLowerCase() === 'high' 
-                              ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' 
-                              : safeCell(f.risk).toLowerCase() === 'medium'
-                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
-                                : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
-                          }`}>
-                            {safeCell(f.risk)}
+                      <tr key={rowKey} className="bg-white dark:bg-gray-900 even:bg-gray-50 dark:even:bg-gray-800">
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300 font-mono">
+                          {item.file || item.file_path || 'N/A'}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300">
+                          {item.line || item.line_number || 'N/A'}
+                        </td>
+                        <td className="px-3 py-4">
+                          <span className={`px-2 py-1 text-xs rounded ${riskClass}`}>
+                            {item.risk || 'Unknown'}
                           </span>
                         </td>
-                        <td className="p-2">{safeCell(f.vulnerability_type)}</td>
-                        <td className="p-2">{safeCell(f.line_number || f.line)}</td>
-                        <td className="p-2 max-w-xs truncate" title={safeCell(f.description)}>{safeCell(f.description)}</td>
-                        <td className="p-2 max-w-xs truncate" title={safeCell(f.recommendation)}>{safeCell(f.recommendation)}</td>
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300">
+                          {item.vulnerability || item.type || item.vulnerability_type || 'Unknown'}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300">
+                          {item.algorithm || item.algorithm_name || 'Unknown'}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300">
+                          {description}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300">
+                          {recommendation}
+                        </td>
                       </tr>
                     );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
       </div>
     </div>
   );

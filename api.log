@@ -8,23 +8,8 @@
   warnings.warn("Failed to import fsevents. Fall back to kqueue")
  * Restarting with watchdog (kqueue)
  * Debugger is active!
- * Debugger PIN: 802-497-697
+ * Debugger PIN: 102-663-107
 /opt/homebrew/lib/python3.11/site-packages/watchdog/observers/__init__.py:78: UserWarning: Failed to import fsevents. Fall back to kqueue
   warnings.warn("Failed to import fsevents. Fall back to kqueue")
-127.0.0.1 - - [19/Apr/2025 11:53:11] "POST /api/scan/ HTTP/1.1" 200 -
-127.0.0.1 - - [19/Apr/2025 11:57:55] "GET /api/scan/demo HTTP/1.1" 200 -
-127.0.0.1 - - [19/Apr/2025 11:59:11] "GET /api/scan/demo HTTP/1.1" 200 -
- * Detected change in '/Users/home/Developer/qvs-pro/api/routes/scan_routes.py', reloading
-Using scanner at: /Users/home/Developer/qvs-pro/scanner/qvs-pro
-Running file scan on 1 files
- * Restarting with watchdog (kqueue)
- * Debugger is active!
- * Debugger PIN: 802-497-697
-/opt/homebrew/lib/python3.11/site-packages/watchdog/observers/__init__.py:78: UserWarning: Failed to import fsevents. Fall back to kqueue
-  warnings.warn("Failed to import fsevents. Fall back to kqueue")
-127.0.0.1 - - [19/Apr/2025 12:06:23] "GET /api/scan/demo HTTP/1.1" 200 -
-127.0.0.1 - - [19/Apr/2025 12:17:47] "GET /api/scan/demo HTTP/1.1" 200 -
-127.0.0.1 - - [19/Apr/2025 12:26:41] "POST /api/scan/ HTTP/1.1" 200 -
-127.0.0.1 - - [19/Apr/2025 12:43:12] "GET /api/scan/demo HTTP/1.1" 200 -
-127.0.0.1 - - [19/Apr/2025 12:48:04] "GET /api/scan/demo HTTP/1.1" 200 -
-127.0.0.1 - - [19/Apr/2025 13:00:13] "GET /api/scan/demo HTTP/1.1" 200 -
+127.0.0.1 - - [20/Apr/2025 12:12:48] "GET /api/scan/demo HTTP/1.1" 200 -
+127.0.0.1 - - [20/Apr/2025 12:13:12] "GET /api/scan/demo HTTP/1.1" 200 -

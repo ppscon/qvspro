@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiSun, FiMoon, FiSearch, FiUpload, FiFile, FiFolder, FiTrash2, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
-import { BrowserRouter as Router, Switch, Route, Link, Redirect } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link, Redirect, useHistory } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import QuantumRiskAssessment from './components/QuantumRiskAssessment';
 import QuantumEducationHub from './components/QuantumEducationHub';
@@ -9,13 +9,16 @@ import QubitVisualization from './components/QubitVisualization';
 import PostQuantumCryptography from './components/PostQuantumCryptography';
 import GroversAlgorithm from './components/GroversAlgorithm';
 import QuantumGlossary from './components/QuantumGlossary';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import ProfilePage from './pages/Profile';
-import AdminDashboard from './pages/AdminDashboard';
-import { AuthProvider } from './hooks/useAuth';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import SignOutButton from './components/SignOutButton';
+import QuantumQuiz from './components/QuantumQuiz';
+import RoadmapTracker from './components/RoadmapTracker';
+import Login from './pages/Login';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
+import { useAuth } from './hooks/useAuth';
+import { supabase } from './lib/supabase';
 
 // Full scanner app component
 const ScannerApp: React.FC = () => {
@@ -29,9 +32,18 @@ const ScannerApp: React.FC = () => {
   const [scanResults, setScanResults] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>('Ready to scan');
+  const { user } = useAuth();
+  const history = useHistory();
 
   // Ref for the hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      history.push('/login');
+    }
+  }, [user, history]);
 
   // Initialize theme based on user preference
   useEffect(() => {
@@ -134,7 +146,35 @@ const ScannerApp: React.FC = () => {
             }
           }
           
-          return sanitized;
+          // Normalize property names for consistency
+          return {
+            ...sanitized,
+            // Ensure file path is always available
+            file_path: sanitized.file_path || sanitized.file || 'N/A',
+            file: sanitized.file || sanitized.file_path || 'N/A',
+            // Ensure line number is always available
+            line_number: sanitized.line_number || sanitized.line || 'N/A',
+            line: sanitized.line || sanitized.line_number || 'N/A',
+            // Ensure risk level is always available
+            risk_level: sanitized.risk_level || sanitized.risk || 'Unknown',
+            risk: sanitized.risk || sanitized.risk_level || 'Unknown',
+            // Ensure vulnerability type is always available
+            vulnerability_type: sanitized.vulnerability_type || sanitized.vulnerability || sanitized.type || 'Unknown',
+            vulnerability: sanitized.vulnerability || sanitized.vulnerability_type || sanitized.type || 'Unknown',
+            type: sanitized.type || sanitized.vulnerability_type || sanitized.vulnerability || 'Unknown',
+            // Ensure algorithm is always available
+            algorithm: sanitized.algorithm || sanitized.algorithm_name || '',
+            // Generate description if not available
+            description: sanitized.description || 
+              (sanitized.algorithm ? `${sanitized.algorithm} vulnerability` : 'No description provided'),
+            // Generate recommendation if not available
+            recommendation: sanitized.recommendation || 
+              ((sanitized.risk || sanitized.risk_level) === 'High' ? 
+                'Replace with post-quantum cryptography algorithm' : 
+              (sanitized.risk || sanitized.risk_level) === 'Medium' ? 
+                'Plan to upgrade to stronger cryptography' : 
+                'Monitor for vulnerabilities')
+          };
         } catch (itemError) {
           console.error('Error sanitizing item:', itemError);
           return {}; // Return an empty object on error
@@ -234,9 +274,27 @@ const ScannerApp: React.FC = () => {
         throw new Error(`Demo scan failed with status: ${response.status}. ${errorText}`);
       }
       const data = await response.json();
+      
+      // Ensure data.results exists and is an array
+      if (!data.results || !Array.isArray(data.results)) {
+        console.error('Invalid scan results format:', data);
+        if (!data.results) {
+          data.results = [];
+        } else if (!Array.isArray(data.results)) {
+          data.results = [data.results];
+        }
+      }
+      
+      // Sanitize results before setting state
+      if (data.results && Array.isArray(data.results)) {
+        data.results = sanitizeScanResults(data.results);
+      }
+      
+      console.log('Demo scan results:', data);
       setScanResults(data);
       setStatusMessage('Demo scan completed! These are results from built-in quantum-vulnerable test files.');
     } catch (err: any) {
+      console.error('Demo scan error:', err);
       setError(`Demo scan error: ${err.message}`);
       setStatusMessage('Demo scan failed');
     } finally {
@@ -290,6 +348,42 @@ const ScannerApp: React.FC = () => {
       }
     }
   }
+
+  // Function to save scan results
+  const saveScanResults = async () => {
+    if (!scanResults || !user) return;
+    
+    setStatusMessage('Saving scan results...');
+    
+    try {
+      const scanRecord = {
+        user_id: user.id,
+        name: files.length > 0 ? files[0].name : 'Scan',
+        description: `Scan of ${files.length} file(s)`,
+        scan_parameters: JSON.stringify({
+          scanType,
+          fileCount: files.length,
+          fileNames: files.map(f => f.name)
+        }),
+        status: 'completed',
+        results: scanResults
+      };
+      
+      const { error } = await supabase
+        .from('scan_records')
+        .insert([scanRecord]);
+        
+      if (error) throw error;
+      
+      setStatusMessage('Scan results saved successfully');
+      // Redirect to dashboard to see all scans
+      history.push('/dashboard');
+    } catch (err: any) {
+      console.error('Error saving scan results:', err);
+      setError(`Failed to save scan results: ${err.message}`);
+      setStatusMessage('Error saving scan results');
+    }
+  };
 
   return (
     <div className="App min-h-screen flex flex-col">
@@ -515,7 +609,23 @@ const ScannerApp: React.FC = () => {
           {/* Scan Results */}
           {scanResults && (
             <div className="section p-6 mt-6">
-              <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Scan Results</h3>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Scan Results</h2>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={saveScanResults}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    Save Results
+                  </button>
+                  <button
+                    onClick={handleReset}
+                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                  >
+                    New Scan
+                  </button>
+                </div>
+              </div>
               
               {/* Download CBOM button */}
               <div className="mb-4">
@@ -573,34 +683,37 @@ const ScannerApp: React.FC = () => {
                         className="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
                       >
                         <td className="p-3 text-gray-700 dark:text-gray-300">
-                          <span className="font-mono text-xs">{result.file_path || 'N/A'}</span>
+                          <span className="font-mono text-xs">{result.file_path || result.file || 'N/A'}</span>
                         </td>
                         <td className="p-3 text-gray-700 dark:text-gray-300">
-                          {result.line_number || 'N/A'}
+                          {result.line_number || result.line || 'N/A'}
                         </td>
                         <td className="p-3">
                           <span
                             className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
-                              result.risk_level === 'Critical'
+                              (result.risk_level || result.risk) === 'Critical'
                                 ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                : result.risk_level === 'High'
+                                : (result.risk_level || result.risk) === 'High'
                                   ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
-                                  : result.risk_level === 'Medium'
+                                  : (result.risk_level || result.risk) === 'Medium'
                                     ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                                     : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                             }`}
                           >
-                            {result.risk_level || 'Unknown'}
+                            {result.risk_level || result.risk || 'Unknown'}
                           </span>
                         </td>
                         <td className="p-3 text-gray-700 dark:text-gray-300">
-                          {result.vulnerability_type || 'Unknown'}
+                          {result.vulnerability_type || result.vulnerability || result.type || 'Unknown'}
                         </td>
                         <td className="p-3 text-gray-700 dark:text-gray-300">
-                          {result.description || 'No description provided'}
+                          {result.description || (result.algorithm ? `${result.algorithm} vulnerability` : 'No description provided')}
                         </td>
                         <td className="p-3 text-gray-700 dark:text-gray-300">
-                          {result.recommendation || 'No recommendation provided'}
+                          {result.recommendation || 
+                            ((result.risk_level || result.risk) === 'High' ? 'Replace with post-quantum cryptography algorithm' : 
+                             (result.risk_level || result.risk) === 'Medium' ? 'Plan to upgrade to stronger cryptography' : 
+                             'Monitor for vulnerabilities')}
                         </td>
                       </tr>
                     ))}
@@ -614,7 +727,7 @@ const ScannerApp: React.FC = () => {
                   <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
                     Quantum Risk Assessment
                   </h3>
-                  <QuantumRiskAssessment findings={scanResults.results} />
+                  <QuantumRiskAssessment findings={scanResults} />
                 </div>
               )}
             </div>
@@ -647,33 +760,35 @@ const ScannerApp: React.FC = () => {
 // Main App component with routes
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <Switch>
-          <Route exact path="/" component={LandingPage} />
-          <Route path="/login" component={Login} />
-          <ProtectedRoute path="/app" redirectTo="/login">
-            <ScannerApp />
-          </ProtectedRoute>
-          <ProtectedRoute path="/dashboard" redirectTo="/login">
-            <Dashboard />
-          </ProtectedRoute>
-          <ProtectedRoute path="/profile" redirectTo="/login">
-            <ProfilePage />
-          </ProtectedRoute>
-          <ProtectedRoute path="/admin" redirectTo="/login">
-            <AdminDashboard />
-          </ProtectedRoute>
-          <Route exact path="/education" component={QuantumEducationHub} />
-          <Route path="/education/shors-algorithm" component={ShorsAlgorithmDemo} />
-          <Route path="/education/qubits" component={QubitVisualization} />
-          <Route path="/education/post-quantum" component={PostQuantumCryptography} />
-          <Route path="/education/grovers-algorithm" component={GroversAlgorithm} />
-          <Route path="/education/glossary" component={QuantumGlossary} />
-          <Redirect to="/" />
-        </Switch>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <Switch>
+        <Route exact path="/" component={LandingPage} />
+        <Route path="/login" component={Login} />
+        <ProtectedRoute path="/dashboard">
+          <Dashboard />
+        </ProtectedRoute>
+        <ProtectedRoute path="/app">
+          <ScannerApp />
+        </ProtectedRoute>
+        <ProtectedRoute path="/profile">
+          <Profile />
+        </ProtectedRoute>
+        <ProtectedRoute path="/admin">
+          <AdminDashboard />
+        </ProtectedRoute>
+        <Route path="/education" exact component={QuantumEducationHub} />
+        <Route path="/education/shors-algorithm" component={ShorsAlgorithmDemo} />
+        <Route path="/education/qubits" component={QubitVisualization} />
+        <Route path="/education/post-quantum" component={PostQuantumCryptography} />
+        <Route path="/education/grovers-algorithm" component={GroversAlgorithm} />
+        <Route path="/education/glossary" component={QuantumGlossary} />
+        <Route path="/education/quiz" component={QuantumQuiz} />
+        <ProtectedRoute path="/internal/roadmap">
+          <RoadmapTracker />
+        </ProtectedRoute>
+        <Redirect to="/" />
+      </Switch>
+    </Router>
   );
 };
 

@@ -55,7 +55,11 @@ const PostQuantumCryptography: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <EducationHeader darkMode={darkMode} toggleTheme={toggleTheme} />
+      <EducationHeader 
+        title="Post-Quantum Cryptography"
+        darkMode={darkMode} 
+        toggleTheme={toggleTheme} 
+      />
 
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8 max-w-5xl">

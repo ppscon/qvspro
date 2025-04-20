@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom';
 import { FiArrowLeft, FiSun, FiMoon } from 'react-icons/fi';
 
 interface EducationHeaderProps {
+  title?: string;
   darkMode?: boolean;
   toggleTheme?: () => void;
 }
 
-const EducationHeader: React.FC<EducationHeaderProps> = ({ darkMode = false, toggleTheme }) => {
+const EducationHeader: React.FC<EducationHeaderProps> = ({ title, darkMode = false, toggleTheme }) => {
   return (
     <header className="header py-4">
       <div className="container">
@@ -16,6 +17,9 @@ const EducationHeader: React.FC<EducationHeaderProps> = ({ darkMode = false, tog
             <Link to="/" className="flex items-center">
               <img src="/images/logo-qvs.png" alt="QVS-Pro Logo" className="logo-qvs" />
             </Link>
+            {title && (
+              <h1 className="ml-4 text-xl font-semibold text-gray-900 dark:text-white">{title}</h1>
+            )}
           </div>
           
           <div className="flex items-center space-x-4">

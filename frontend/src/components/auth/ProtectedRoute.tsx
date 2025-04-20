@@ -1,9 +1,10 @@
-import React from 'react';
-import { Route, Redirect, RouteProps } from 'react-router-dom';
+import React, { ReactNode } from 'react';
+import { Route, Redirect, RouteProps, RouteComponentProps } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
-interface ProtectedRouteProps extends RouteProps {
+interface ProtectedRouteProps extends Omit<RouteProps, 'render'> {
   redirectTo?: string;
+  children: ReactNode;
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
@@ -25,14 +26,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   return (
     <Route
       {...rest}
-      render={({ location }) =>
+      render={(props: RouteComponentProps) =>
         user ? (
           children
         ) : (
           <Redirect
             to={{
               pathname: redirectTo,
-              state: { from: location }
+              state: { from: props.location }
             }}
           />
         )
