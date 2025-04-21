@@ -1,0 +1,10 @@
+{
+  "ignore_dirs": [
+    "node_modules",
+    "dist",
+    ".git",
+    "build"
+  ],
+  "fsevents_latency": 0.05,
+  "settle": 5000
+} 

@@ -567,7 +567,7 @@ const RoadmapTracker: React.FC = () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <Link to="/" className="flex items-center">
-                <img src="/images/logo-qvs.png" alt="QVS-Pro Logo" className="h-8 w-auto mr-2" />
+                <img src="/images/logo-qvs.png" alt="QVS-Pro Logo" className="logo-qvs" />
                 <h1 className="text-xl font-bold text-gray-900 dark:text-white">Roadmap Tracker</h1>
               </Link>
             </div>

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useHistory } from 'react-router-dom';
-import { FiArrowLeft, FiDownload, FiTrash2, FiAlertTriangle } from 'react-icons/fi';
+import { FiArrowLeft, FiDownload, FiTrash2, FiAlertTriangle, FiExternalLink } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import QuantumRiskAssessment from '../components/QuantumRiskAssessment';
 import { ScanRecord } from '../types';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const ScanView: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +17,14 @@ const ScanView: React.FC = () => {
   const [scanRecord, setScanRecord] = useState<ScanRecord | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [scanData, setScanData] = useState<any | null>(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    return document.documentElement.classList.contains('dark');
+  });
+
+  const toggleTheme = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle('dark');
+  };
 
   useEffect(() => {
     if (user && id) {
@@ -128,12 +138,12 @@ const ScanView: React.FC = () => {
   // Render loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+        <Header darkMode={darkMode} toggleTheme={toggleTheme} />
+        <div className="container mx-auto px-4 py-8 flex-grow flex justify-center items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -141,9 +151,10 @@ const ScanView: React.FC = () => {
   // Render error state
   if (error || !scanRecord) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+        <Header darkMode={darkMode} toggleTheme={toggleTheme} />
+        <div className="container mx-auto px-4 py-8 flex-grow flex justify-center items-center">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center max-w-lg w-full">
             <FiAlertTriangle className="mx-auto text-red-500" size={48} />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mt-4 mb-2">
               {error || 'Scan not found'}
@@ -159,13 +170,15 @@ const ScanView: React.FC = () => {
             </Link>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <Header darkMode={darkMode} toggleTheme={toggleTheme} />
+      <div className="container mx-auto px-4 py-8 flex-grow">
         {/* Header and actions */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
@@ -276,6 +289,7 @@ const ScanView: React.FC = () => {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 };

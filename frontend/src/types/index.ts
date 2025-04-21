@@ -2,6 +2,7 @@
 export interface UserCredentials {
   email: string;
   password: string;
+  profile_name?: string;
 }
 
 // User profile types
@@ -9,6 +10,7 @@ export interface UserProfile {
   id: string;
   username?: string;
   full_name?: string;
+  profile_name?: string;
   avatar_url?: string;
   company?: string;
   job_title?: string;

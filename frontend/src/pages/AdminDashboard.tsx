@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FiUser, FiShield, FiArrowLeft, FiUserPlus, FiUserX, FiCheck, FiX, FiAlertCircle, FiSun, FiMoon } from 'react-icons/fi';
+import { FiUser, FiShield, FiArrowLeft, FiUserPlus, FiUserX, FiCheck, FiX, FiAlertCircle, FiSun, FiMoon, FiMail, FiTrash2, FiUserCheck, FiUsers } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
+import Footer from '../components/Footer';
 
 interface BetaUser {
   id: string;
@@ -275,26 +276,7 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 mt-auto">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between py-6">
-            <div className="flex items-center space-x-4">
-              <img
-                src="/images/logo-qvs.png"
-                alt="QVS-Pro Logo"
-                className="logo-qvs-footer"
-              />
-            </div>
-            <div className="mt-4 md:mt-0 text-center md:text-right">
-              <p className="text-sm text-gray-400">
-                &copy; {new Date().getFullYear()} Quantum Vulnerability Scanner | <a href="https://qvspro.net" className="text-blue-400 hover:underline">qvspro.net</a> | All rights reserved.
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

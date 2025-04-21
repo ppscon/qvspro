@@ -8,7 +8,7 @@ const EducationFooter: React.FC = () => {
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="flex items-center mb-4 md:mb-0">
             <Link to="/" className="flex items-center">
-              <img src="/images/logo-qvs.png" alt="QVS-Pro Logo" className="logo-qvs-footer" style={{ height: '30px' }} />
+              <img src="/images/logo-qvs.png" alt="QVS-Pro Logo" className="logo-qvs-footer" />
               <span className="ml-2 text-gray-700 dark:text-gray-300">qvspro.net</span>
             </Link>
           </div>

@@ -1,38 +1,9 @@
- * Serving Flask app 'app' (lazy loading)
- * Environment: production
-   WARNING: This is a development server. Do not use it in a production deployment.
-   Use a production WSGI server instead.
- * Debug mode: off
 Traceback (most recent call last):
-  File "/Users/home/Developer/qvs-pro/api/app.py", line 43, in <module>
-    app.run(debug=False, port=5001)
-    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/homebrew/lib/python3.11/site-packages/flask/app.py", line 922, in run
-    run_simple(t.cast(str, host), port, self, **options)
-    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/homebrew/lib/python3.11/site-packages/werkzeug/serving.py", line 1008, in run_simple
-    inner()
-    ~~~~~^^
-  File "/opt/homebrew/lib/python3.11/site-packages/werkzeug/serving.py", line 948, in inner
-    srv = make_server(
-        hostname,
-    ...<7 lines>...
-        fd=fd,
-    )
-  File "/opt/homebrew/lib/python3.11/site-packages/werkzeug/serving.py", line 780, in make_server
-    return ThreadedWSGIServer(
-        host, port, app, request_handler, passthrough_errors, ssl_context, fd=fd
-    )
-  File "/opt/homebrew/lib/python3.11/site-packages/werkzeug/serving.py", line 686, in __init__
-    super().__init__(server_address, handler)  # type: ignore
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 457, in __init__
-    self.server_bind()
-    ~~~~~~~~~~~~~~~~^^
-  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/http/server.py", line 136, in server_bind
-    socketserver.TCPServer.server_bind(self)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
-  File "/opt/homebrew/Cellar/python@3.13/3.13.2/Frameworks/Python.framework/Versions/3.13/lib/python3.13/socketserver.py", line 478, in server_bind
-    self.socket.bind(self.server_address)
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
-OSError: [Errno 48] Address already in use
+  File "<string>", line 1, in <module>
+    import os; os.environ['PYTHONUNBUFFERED'] = '1'; from app import app; app.run(host='0.0.0.0', port=5001, debug=True, use_reloader=True, extra_files=None)
+                                                     ^^^^^^^^^^^^^^^^^^^
+  File "/Users/home/Developer/qvs-pro/api/app.py", line 24, in <module>
+    from routes.network_routes import network_bp
+  File "/Users/home/Developer/qvs-pro/api/routes/network_routes.py", line 20, in <module>
+    from api.services.network.network_analyzer import NetworkTrafficAnalyzer
+ModuleNotFoundError: No module named 'api'

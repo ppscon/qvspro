@@ -1,30 +1,27 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { FiArrowLeft } from 'react-icons/fi';
+import React, { useState } from 'react';
 import { Profile as ProfileComponent } from '../components/auth/Profile';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const ProfilePage: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Your Profile</h1>
-            <Link 
-              to="/dashboard" 
-              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              <FiArrowLeft className="mr-2" /> Back to Dashboard
-            </Link>
-          </div>
-        </div>
-      </header>
+  const [darkMode, setDarkMode] = useState(() => {
+    return document.documentElement.classList.contains('dark');
+  });
 
-      {/* Main Content */}
-      <main className="container mx-auto py-8">
+  const toggleTheme = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle('dark');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <Header darkMode={darkMode} toggleTheme={toggleTheme} />
+      
+      <main className="container mx-auto py-8 px-4 flex-grow">
         <ProfileComponent />
       </main>
+      
+      <Footer />
     </div>
   );
 };

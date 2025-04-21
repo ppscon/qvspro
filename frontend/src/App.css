@@ -7,13 +7,15 @@
 }
 
 .logo-qvs {
-  height: 40px;
+  height: 200px;
   width: auto;
+  margin-right: 0.75rem;
 }
 
 .logo-qvs-footer {
-  height: 30px;
+  height: 100px;
   width: auto;
+  margin-right: 0.5rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {

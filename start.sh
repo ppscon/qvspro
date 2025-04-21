@@ -62,7 +62,14 @@ cd "$API_DIR"
 
 # Check if Python 3 is available
 if command -v python3 &> /dev/null; then
-  FLASK_DEBUG=0 python3 app.py > "$PROJECT_DIR/api.log" 2>&1 &
+  # Set Flask environment variables to exclude node_modules from watching
+  export FLASK_DEBUG=0
+  export FLASK_APP=app.py
+  # Exclude node_modules and other large directories from file watching
+  export FLASK_SKIP_PATTERNS="node_modules/*,*/node_modules/*,*/\.*/*,*/__pycache__/*,*/\.*"
+  
+  # Start Flask with reduced file watching
+  python3 -c "import os; os.environ['PYTHONUNBUFFERED'] = '1'; from app import app; app.run(host='0.0.0.0', port=5001, debug=True, use_reloader=True, extra_files=None)" > "$PROJECT_DIR/api.log" 2>&1 &
   API_PID=$!
   echo "API server started with PID: $API_PID"
   echo "API logs being written to $PROJECT_DIR/api.log"

@@ -255,3 +255,18 @@ button:focus, a:focus {
 .dark .text-shadow-lg {
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+/* Logo styles that will override any other styles */
+.logo-qvs,
+img.logo-qvs {
+  height: 200px !important;
+  width: auto !important;
+  margin-right: 0.75rem !important;
+}
+
+.logo-qvs-footer,
+img.logo-qvs-footer {
+  height: 100px !important;
+  width: auto !important;
+  margin-right: 0.5rem !important;
+}

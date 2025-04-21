@@ -273,17 +273,16 @@ const HelpCenter: React.FC<HelpCenterProps> = ({ darkMode, onClose, initialSecti
     <div className={`fixed inset-0 z-50 overflow-y-auto ${darkMode ? 'text-white bg-gray-900' : 'text-gray-800 bg-white'}`}>
       <div className="min-h-screen p-4 flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6 border-b pb-4">
-          <h2 className="text-2xl font-bold flex items-center">
-            <FiHelpCircle className="mr-2 text-blue-500" size={24} />
-            QVS-Pro Help Center
-          </h2>
-          <button 
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center">
+            <img src="/images/logo-qvs.png" alt="QVS-Pro Logo" className="logo-qvs" />
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Help Center</h1>
+          </div>
+          <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            aria-label="Close help center"
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
           >
-            <FiX size={24} />
+            <FiX className="text-gray-600 dark:text-gray-400" />
           </button>
         </div>
         

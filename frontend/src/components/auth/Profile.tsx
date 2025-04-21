@@ -3,6 +3,7 @@ import { FiUser, FiSave, FiAlertCircle, FiCheck } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 import { UserProfile } from '../../types';
+import Footer from '../../components/Footer';
 
 export const Profile: React.FC = () => {
   const { user, profile: authProfile } = useAuth();
@@ -72,7 +73,7 @@ export const Profile: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
+    <div className="max-w-2xl mx-auto">
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Your Profile</h2>
         
@@ -93,6 +94,22 @@ export const Profile: React.FC = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="profile_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Profile Name
+              </label>
+              <div className="mt-1">
+                <input
+                  id="profile_name"
+                  name="profile_name"
+                  type="text"
+                  value={profile.profile_name || ''}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                />
+              </div>
+            </div>
+
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Username

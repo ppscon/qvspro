@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiUpload, FiAlertTriangle, FiCheckCircle, FiDownload, FiSearch, FiWifi } from 'react-icons/fi';
+import { FiUpload, FiAlertTriangle, FiCheckCircle, FiDownload, FiSearch, FiWifi, FiLock, FiFile, FiLoader } from 'react-icons/fi';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import QuantumRiskAssessment from './QuantumRiskAssessment';
+import NetworkTrafficMap from './NetworkTrafficMap';
+import TLSHandshakeVisualizer from './TLSHandshakeVisualizer';
+import CertificateChainVisualizer from './CertificateChainVisualizer';
 
 interface NetworkTrafficAnalyzerProps {
   darkMode: boolean;
@@ -19,6 +22,8 @@ const NetworkTrafficAnalyzer: React.FC<NetworkTrafficAnalyzerProps> = ({ darkMod
   const [scanResults, setScanResults] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>('Ready to analyze network traffic');
+  const [showTlsAnalysis, setShowTlsAnalysis] = useState<boolean>(false);
+  const [tlsDetailsVisible, setTlsDetailsVisible] = useState<string[]>([]);
   const { user } = useAuth();
   
   // Ref for the hidden file input
@@ -202,6 +207,121 @@ const NetworkTrafficAnalyzer: React.FC<NetworkTrafficAnalyzerProps> = ({ darkMod
     }
   };
 
+  // Toggle TLS handshake analysis view
+  const toggleTlsAnalysis = () => {
+    setShowTlsAnalysis(!showTlsAnalysis);
+  };
+
+  // Toggle visibility of a specific TLS session details
+  const toggleTlsDetails = (sessionId: string) => {
+    if (tlsDetailsVisible.includes(sessionId)) {
+      setTlsDetailsVisible(tlsDetailsVisible.filter(id => id !== sessionId));
+    } else {
+      setTlsDetailsVisible([...tlsDetailsVisible, sessionId]);
+    }
+  };
+
+  // Render TLS handshake analysis details
+  const renderTlsHandshakeDetails = (session: any) => {
+    if (!tlsDetailsVisible.includes(session.session_id)) {
+      return null;
+    }
+
+    return (
+      <div className="mt-2 pl-4 border-l-2 border-blue-500">
+        <TLSHandshakeVisualizer handshakeData={session} darkMode={darkMode} />
+        
+        {/* Add Certificate Chain Visualizer if certificate data is available */}
+        {session.details?.certificate && (
+          <div className="mt-4">
+            <CertificateChainVisualizer
+              certificateData={session}
+              darkMode={darkMode} 
+            />
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render the results table
+  const renderResults = () => {
+    if (!scanResults || !scanResults.results || scanResults.results.length === 0) {
+      return (
+        <div className="text-center p-4 border rounded bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+          No scan results available. Please run a scan first.
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
+          <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-2">Scan Summary</h3>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Total Sessions</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-white">{scanResults.session_count}</p>
+            </div>
+            <div className="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Vulnerable</p>
+              <p className="text-2xl font-bold text-red-600 dark:text-red-400">{scanResults.vulnerable_count}</p>
+            </div>
+            <div className="p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <p className="text-sm text-gray-500 dark:text-gray-400">Safe</p>
+              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{scanResults.safe_count}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+            <thead className="bg-gray-100 dark:bg-gray-700">
+              <tr>
+                <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Protocol</th>
+                <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Algorithm</th>
+                <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Risk</th>
+                <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Connection</th>
+                <th className="py-2 px-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Details</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {scanResults.results.map((result: any, index: number) => (
+                <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-750">
+                  <td className="py-4 px-4 text-sm text-gray-900 dark:text-white">{result.protocol}</td>
+                  <td className="py-4 px-4 text-sm text-gray-900 dark:text-white">{result.algorithm}</td>
+                  <td className="py-4 px-4 text-sm">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      result.risk === 'High' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
+                      result.risk === 'Medium' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                      result.risk === 'Low' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                    }`}>
+                      {result.risk}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4 text-sm text-gray-900 dark:text-white">
+                    <div>{result.source}</div>
+                    <div className="text-gray-500 dark:text-gray-400">→ {result.destination}</div>
+                  </td>
+                  <td className="py-4 px-4 text-sm text-gray-500 dark:text-gray-400">
+                    <button
+                      onClick={() => toggleTlsDetails(result.session_id)}
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                    >
+                      {tlsDetailsVisible.includes(result.session_id) ? 'Hide Details' : 'Show Details'}
+                    </button>
+                    {tlsDetailsVisible.includes(result.session_id) && renderTlsHandshakeDetails(result)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Network Traffic Analyzer</h2>
@@ -242,200 +362,220 @@ const NetworkTrafficAnalyzer: React.FC<NetworkTrafficAnalyzerProps> = ({ darkMod
           <FiSearch className="mr-2" />
           Demo Network Scan
         </button>
-      </div>
-
-      {/* PCAP File Selection */}
-      {captureMethod === 'pcap' && (
-        <div className="mb-6">
-          <div
-            className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-500"
-            onClick={triggerFileInput}
-          >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pcap,.pcapng"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-            <FiUpload className="mx-auto mb-4 text-gray-400 dark:text-gray-600" size={32} />
-            <p className="text-gray-600 dark:text-gray-400 mb-2">
-              {pcapFile
-                ? `Selected file: ${pcapFile.name} (${(pcapFile.size / 1024 / 1024).toFixed(2)} MB)`
-                : 'Click to select or drag and drop a PCAP file here'}
-            </p>
-            <button
-              type="button"
-              className="mt-2 px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Select PCAP File
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Live Capture Settings */}
-      {captureMethod === 'live' && (
-        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Network Interface
-            </label>
-            <select
-              value={interface_}
-              onChange={(e) => setInterface(e.target.value)}
-              className="w-full p-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-            >
-              {availableInterfaces.length > 0 ? (
-                availableInterfaces.map((iface, index) => (
-                  <option key={index} value={iface}>
-                    {iface}
-                  </option>
-                ))
-              ) : (
-                <option value="">No interfaces available</option>
-              )}
-            </select>
-            {availableInterfaces.length === 0 && (
-              <p className="mt-1 text-sm text-yellow-500">
-                Network interfaces could not be detected. This feature may require desktop application privileges.
-              </p>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Capture Duration (seconds)
-            </label>
-            <input
-              type="number"
-              min={10}
-              max={3600}
-              value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
-              className="w-full p-2 border rounded-md bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Action Button */}
-      <div className="flex mb-6">
         <button
           type="button"
-          onClick={handleAnalyze}
-          disabled={isLoading || (captureMethod === 'pcap' && !pcapFile) || (captureMethod === 'live' && !interface_)}
-          className="flex-1 flex justify-center items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={toggleTlsAnalysis}
+          className={`flex items-center px-4 py-2 rounded-md ${showTlsAnalysis
+              ? 'bg-green-600 text-white'
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+            }`}
         >
-          {isLoading ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              {captureMethod === 'pcap' ? 'Analyzing...' : 'Capturing...'}
-            </>
-          ) : (
-            <>
-              <FiSearch className="mr-2" />
-              {captureMethod === 'pcap' ? 'Analyze PCAP' : 'Start Capture & Analysis'}
-            </>
-          )}
+          <FiLock className="mr-2" />
+          TLS Handshake Analysis
         </button>
       </div>
 
-      {/* Status Message */}
-      <div className="mb-6 text-center">
-        <p
-          className={`py-2 px-3 rounded-md inline-block text-sm ${error
-              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-              : isLoading
-                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                : scanResults
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                  : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-            }`}
-        >
-          {error ? (
-            <span className="flex items-center">
-              <FiAlertTriangle className="mr-2" /> {error}
-            </span>
-          ) : (
-            <span className="flex items-center">
-              {scanResults && !isLoading && <FiCheckCircle className="mr-2" />}
-              {statusMessage}
-            </span>
-          )}
-        </p>
-      </div>
-
-      {/* Scan Results */}
-      {scanResults && (
-        <div className="mt-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Analysis Results</h3>
-            <div className="flex space-x-2">
+      {/* PCAP File Selection */}
+      {captureMethod === 'pcap' && !showTlsAnalysis && (
+        <div className="mb-6">
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept=".pcap,.pcapng"
+            onChange={handleFileChange}
+          />
+          <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+            <div className="text-center">
+              {pcapFile ? (
+                <div>
+                  <FiFile className="mx-auto h-12 w-12 text-gray-400" />
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{pcapFile.name}</p>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+                    {(pcapFile.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <FiUpload className="mx-auto h-12 w-12 text-gray-400" />
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Click to upload a PCAP file</p>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">
+                    Supports .pcap and .pcapng files
+                  </p>
+                </div>
+              )}
               <button
-                onClick={saveScanResults}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                type="button"
+                onClick={triggerFileInput}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Save Results
-              </button>
-              <button
-                onClick={() => {
-                  // Create CSV content
-                  const headers = ['Protocol', 'Algorithm', 'Risk', 'Vulnerability', 'Source', 'Destination', 'Description', 'Recommendation'];
-                  const rows = scanResults.results.map((r: any) => [
-                    r.protocol || 'N/A',
-                    r.algorithm || 'N/A',
-                    r.risk || 'Unknown',
-                    r.vulnerability_type || 'Unknown',
-                    r.source || 'N/A',
-                    r.destination || 'N/A',
-                    r.description || 'N/A',
-                    r.recommendation || 'N/A'
-                  ]);
-                  const csvContent = [headers, ...rows].map(e => e.map((item: string | number) => `"${String(item).replace(/"/g, '""')}"`).join(',')).join('\n');
-                  
-                  // Create and download the file
-                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.setAttribute('href', url);
-                  link.setAttribute('download', 'network_crypto_analysis.csv');
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center"
-              >
-                <FiDownload className="mr-2" /> Export CSV
+                Browse Files
               </button>
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Summary Information */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow">
-              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">Total Cryptographic Sessions</h4>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{scanResults.session_count || scanResults.results?.length || 0}</p>
-            </div>
-            <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow">
-              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">Vulnerable Sessions</h4>
-              <p className="text-2xl font-bold text-red-600 dark:text-red-400">{scanResults.vulnerable_count || 0}</p>
-            </div>
-            <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow">
-              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase mb-1">Quantum-Safe Sessions</h4>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400">{scanResults.safe_count || 0}</p>
+      {/* Live Capture Interface Selection */}
+      {captureMethod === 'live' && !showTlsAnalysis && (
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Select Network Interface
+          </label>
+          <select
+            value={interface_}
+            onChange={(e) => setInterface(e.target.value)}
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+          >
+            <option value="">Select an interface</option>
+            {availableInterfaces.map((iface) => (
+              <option key={iface} value={iface}>
+                {iface}
+              </option>
+            ))}
+          </select>
+
+          {/* Duration slider */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Capture Duration: {duration} seconds
+            </label>
+            <input
+              type="range"
+              min="10"
+              max="300"
+              step="10"
+              value={duration}
+              onChange={(e) => setDuration(parseInt(e.target.value))}
+              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <span>10s</span>
+              <span>60s</span>
+              <span>120s</span>
+              <span>300s</span>
             </div>
           </div>
+        </div>
+      )}
 
-          {/* Analysis Results */}
+      {/* TLS Handshake Analysis UI */}
+      {showTlsAnalysis && (
+        <div className="mb-6 p-4 border border-gray-300 dark:border-gray-600 rounded-lg">
+          <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">TLS Handshake Analysis</h3>
+          <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+            This advanced feature allows you to examine TLS handshakes for quantum vulnerabilities.
+            It can identify vulnerable key exchange methods, certificates, and cipher suites.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="text-md font-medium mb-2 text-gray-800 dark:text-gray-200">Key Features</h4>
+              <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400">
+                <li>Analyze TLS 1.2 and TLS 1.3 handshakes</li>
+                <li>Identify quantum-vulnerable cryptography</li>
+                <li>Detailed protocol inspection</li>
+                <li>Certificate chain analysis</li>
+                <li>Recommendations for quantum-safe alternatives</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-md font-medium mb-2 text-gray-800 dark:text-gray-200">Vulnerable Elements</h4>
+              <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400">
+                <li>RSA key exchange (all versions)</li>
+                <li>ECDHE using NIST curves (P-256, P-384, etc.)</li>
+                <li>DHE with finite field groups</li>
+                <li>RSA and ECDSA certificates</li>
+                <li>DSA signatures</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="mt-6 text-center">
+            <button
+              type="button"
+              onClick={handleNetworkDemo}
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={isLoading}
+            >
+              <FiSearch className="mr-2" />
+              Run TLS Analysis Demo
+            </button>
+          </div>
+          
+          {/* Display TLS Handshake Visualizer when results are available */}
           {scanResults && scanResults.results && scanResults.results.length > 0 && (
-            <div className="mt-4">
-              <h4 className="text-lg font-medium mb-4 text-gray-800 dark:text-gray-200">Detailed Analysis</h4>
-              <QuantumRiskAssessment findings={scanResults} />
+            <div className="mt-8">
+              {scanResults.results.filter((result: any) => result.protocol === 'TLS').map((tlsSession: any, index: number) => (
+                <div key={index} className="mb-8">
+                  <TLSHandshakeVisualizer 
+                    handshakeData={tlsSession}
+                    darkMode={darkMode}
+                  />
+                  
+                  {/* Certificate Chain Visualization */}
+                  {tlsSession.details?.certificate && (
+                    <div className="mt-4">
+                      <CertificateChainVisualizer
+                        certificateData={tlsSession}
+                        darkMode={darkMode} 
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+              
+              {scanResults.results.filter((result: any) => result.protocol === 'TLS').length === 0 && (
+                <div className="text-center p-6 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                  <p className="text-gray-600 dark:text-gray-300">No TLS handshakes found in the scan results.</p>
+                </div>
+              )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Action button */}
+      {!showTlsAnalysis && (
+        <div className="mb-6">
+          <button
+            type="button"
+            onClick={handleAnalyze}
+            className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={isLoading || (captureMethod === 'pcap' && !pcapFile) || (captureMethod === 'live' && !interface_)}
+          >
+            {isLoading ? <FiLoader className="animate-spin mr-2" /> : <FiSearch className="mr-2" />}
+            {isLoading ? 'Analyzing...' : `Analyze ${captureMethod === 'pcap' ? 'PCAP File' : 'Live Traffic'}`}
+          </button>
+        </div>
+      )}
+
+      {/* Status Message */}
+      {statusMessage && (
+        <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+          <p className="text-sm text-gray-600 dark:text-gray-300">{statusMessage}</p>
+        </div>
+      )}
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-lg">
+          <p className="flex items-center">
+            <FiAlertTriangle className="mr-2" />
+            {error}
+          </p>
+        </div>
+      )}
+
+      {/* Results Display */}
+      {scanResults && (
+        <div className="mt-8">
+          <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Scan Results</h3>
+          {renderResults()}
+          
+          {/* Network Traffic Map */}
+          <NetworkTrafficMap scanResults={scanResults} darkMode={darkMode} />
         </div>
       )}
     </div>

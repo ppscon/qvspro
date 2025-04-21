@@ -23,6 +23,7 @@ import ScanCompare from './pages/ScanCompare';
 import { useAuth } from './hooks/useAuth';
 import { supabase } from './lib/supabase';
 import HelpCenter from './components/HelpCenter';
+import Footer from './components/Footer';
 
 // Full scanner app component
 const ScannerApp: React.FC = () => {
@@ -788,24 +789,7 @@ const ScannerApp: React.FC = () => {
         </div>
       </main>
 
-      <footer className="footer">
-        <div className="container">
-          <div className="flex flex-col md:flex-row items-center justify-between py-6">
-            <div className="flex items-center space-x-4">
-              <img
-                src="/images/logo-qvs.png"
-                alt="QVS-Pro Logo"
-                className="logo-qvs-footer"
-              />
-            </div>
-            <div className="mt-4 md:mt-0 text-center md:text-right">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                &copy; {new Date().getFullYear()} Quantum Vulnerability Scanner | <a href="https://qvspro.net" className="hover:underline">qvspro.net</a> | All rights reserved.
-              </p>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Help Center */}
       {helpVisible && (

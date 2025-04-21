@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiMail, FiLock, FiAlertCircle, FiArrowRight } from 'react-icons/fi';
+import { FiMail, FiLock, FiAlertCircle, FiArrowRight, FiUser } from 'react-icons/fi';
 import { useAuth } from '../../hooks/useAuth';
 import { UserCredentials } from '../../types';
 
@@ -11,6 +11,7 @@ export const Auth: React.FC<AuthProps> = ({ redirectTo = '/app' }) => {
   const [mode, setMode] = useState<'signIn' | 'signUp' | 'resetPassword'>('signIn');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [profileName, setProfileName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -29,7 +30,10 @@ export const Auth: React.FC<AuthProps> = ({ redirectTo = '/app' }) => {
         if (error) throw error;
         window.location.href = redirectTo;
       } else if (mode === 'signUp') {
-        const { error } = await signUp({ email, password });
+        if (!profileName.trim()) {
+          throw new Error('Profile name is required');
+        }
+        const { error } = await signUp({ email, password, profile_name: profileName });
         if (error) throw error;
         setMessage('Registration successful! Please check your email to confirm your account.');
         setMode('signIn');
@@ -89,6 +93,30 @@ export const Auth: React.FC<AuthProps> = ({ redirectTo = '/app' }) => {
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
+            {mode === 'signUp' && (
+              <div>
+                <label htmlFor="profileName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Profile Name
+                </label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FiUser className="text-gray-400" />
+                  </div>
+                  <input
+                    id="profileName"
+                    name="profileName"
+                    type="text"
+                    autoComplete="name"
+                    required
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    className="pl-10 block w-full py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder="Your full name"
+                  />
+                </div>
+              </div>
+            )}
+            
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email address

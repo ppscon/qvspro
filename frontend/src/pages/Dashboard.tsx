@@ -5,6 +5,8 @@ import { BiGitCompare } from 'react-icons/bi';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { ScanRecord } from '../types';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const Dashboard: React.FC = () => {
   const { user, profile, signOut, isAdmin } = useAuth();
@@ -14,6 +16,19 @@ const Dashboard: React.FC = () => {
   const [compareMode, setCompareMode] = useState(false);
   const [selectedScans, setSelectedScans] = useState<string[]>([]);
   const history = useHistory();
+  const [darkMode, setDarkMode] = useState(() => {
+    return document.documentElement.classList.contains('dark');
+  });
+  const [helpVisible, setHelpVisible] = useState(false);
+
+  const toggleTheme = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle('dark');
+  };
+
+  const toggleHelp = () => {
+    setHelpVisible(!helpVisible);
+  };
 
   useEffect(() => {
     if (user) {
@@ -64,49 +79,15 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <Link to="/">
-              <img src="/images/logo-qvs.png" alt="QVS Logo" className="h-10 mr-4" />
-            </Link>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">
-                {profile?.username || user?.email}
-              </span>
-              <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                {profile?.avatar_url ? (
-                  <img 
-                    src={profile.avatar_url} 
-                    alt={profile.username || 'User'} 
-                    className="h-8 w-8 rounded-full object-cover" 
-                  />
-                ) : (
-                  <FiUser />
-                )}
-              </div>
-            </div>
-            <button 
-              onClick={() => signOut()}
-              className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            >
-              <FiLogOut />
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <Header darkMode={darkMode} toggleTheme={toggleTheme} toggleHelp={toggleHelp} />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-grow">
         {/* Welcome Section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome, {profile?.full_name || profile?.username || user?.email?.split('@')[0]}!
+            Welcome, {profile?.profile_name || profile?.full_name || profile?.username || user?.email?.split('@')[0]}!
           </h2>
           <p className="text-gray-600 dark:text-gray-300">
             Manage your quantum vulnerability scans and access your profile information.
@@ -310,6 +291,8 @@ const Dashboard: React.FC = () => {
           )}
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

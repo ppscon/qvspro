@@ -15,8 +15,12 @@ try:
     DEPENDENCIES_AVAILABLE = True
 except ImportError:
     DEPENDENCIES_AVAILABLE = False
-    
+
+# Import our network traffic analyzer    
+from api.services.network.network_analyzer import NetworkTrafficAnalyzer
+
 network_bp = Blueprint('network', __name__)
+network_analyzer = NetworkTrafficAnalyzer()
 
 @network_bp.route('/interfaces', methods=['GET'])
 def get_network_interfaces():
@@ -45,8 +49,16 @@ def get_network_interfaces():
 
 @network_bp.route('/demo', methods=['GET'])
 def network_demo():
-    """Run a demo network analysis with pre-generated results"""
-    return generate_demo_nta_results()
+    """Run a demo network analysis with generated results"""
+    try:
+        # Use our network analyzer to generate demo results
+        results = network_analyzer.get_demo_analysis()
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "error": f"Error generating demo results: {str(e)}"
+        }), 500
 
 @network_bp.route('/analyze-pcap', methods=['POST'])
 def analyze_pcap():
@@ -66,9 +78,13 @@ def analyze_pcap():
         pcap_path = os.path.join(temp_dir, secure_filename(pcap_file.filename))
         pcap_file.save(pcap_path)
         
-        # For demo purposes, we'll use the simulated output
-        # In a real implementation, this would analyze the PCAP file
-        return generate_demo_nta_results()
+        # Analyze the PCAP file with our network analyzer
+        analysis_results = network_analyzer.analyze_pcap(pcap_path)
+        
+        # Format results for API response
+        api_results = network_analyzer.format_results_for_api(analysis_results)
+        
+        return jsonify(api_results)
             
     except Exception as e:
         return jsonify({"error": f"Error analyzing PCAP file: {str(e)}"}), 500
@@ -96,147 +112,66 @@ def capture_traffic():
         # For demo/testing purposes, we'll simulate a short wait
         time.sleep(min(duration * 0.1, 5))  # Simulate at most 5 seconds
         
-        # Generate simulated results rather than actually capturing
-        return generate_demo_nta_results()
+        # Generate simulated results for now
+        # In a real implementation, this would capture traffic and analyze it
+        results = network_analyzer.get_demo_analysis()
+        
+        return jsonify(results)
             
     except Exception as e:
         return jsonify({"error": f"Error capturing traffic: {str(e)}"}), 500
 
+@network_bp.route('/tls-handshake-analysis', methods=['POST'])
+def analyze_tls_handshake():
+    """
+    Analyze a specific TLS handshake for quantum vulnerabilities
+    
+    This endpoint allows for direct analysis of a TLS handshake without requiring a full PCAP file.
+    Useful for API integrations and specific handshake testing.
+    
+    Request body should contain a JSON representation of the TLS handshake with at least:
+    - client_hello
+    - server_hello
+    - (optionally) certificate data
+    """
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "No handshake data provided"}), 400
+        
+        # Validate that we have at least basic handshake components
+        if 'client_hello' not in data or 'server_hello' not in data:
+            return jsonify({
+                "error": "Incomplete handshake data. Both client_hello and server_hello are required."
+            }), 400
+        
+        # Analyze the handshake
+        result = network_analyzer.tls_inspector.inspect_handshake(data)
+        
+        # Add mock connection information if not present
+        if 'source' not in result:
+            result['source'] = '192.168.1.10:12345'
+        if 'destination' not in result:
+            result['destination'] = '93.184.216.34:443'
+        if 'port' not in result:
+            result['port'] = 443
+        if 'session_id' not in result:
+            result['session_id'] = 'TLS-Custom'
+        
+        # Return the analysis result
+        return jsonify({
+            "status": "success",
+            "scan_type": "tls_handshake",
+            "result": result
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "error": f"Error analyzing TLS handshake: {str(e)}"
+        }), 500
+
+# In real implementation, this would be replaced by the network analyzer's implementation
 def generate_demo_nta_results():
     """Generate simulated network traffic analysis results for development/demo purposes"""
-    # Create simulated cryptographic findings that would be found in network traffic
-    results = []
-    
-    # TLS connections
-    results.extend([
-        {
-            "protocol": "TLS",
-            "algorithm": "RSA-2048",
-            "vulnerability_type": "Shor's Algorithm",
-            "risk": "High",
-            "source": "192.168.1.100:52364",
-            "destination": "93.184.216.34:443",
-            "port": 443,
-            "certificate": "*.example.com",
-            "cipher_suite": "TLS_RSA_WITH_AES_256_GCM_SHA384",
-            "key_exchange": "RSA",
-            "encryption": "AES-256-GCM",
-            "signature": "RSA",
-            "session_id": "TLS-1-0",
-            "description": "RSA-2048 key exchange is vulnerable to quantum attacks using Shor's algorithm",
-            "recommendation": "Migrate to quantum-resistant algorithms like CRYSTALS-Kyber"
-        },
-        {
-            "protocol": "TLS",
-            "algorithm": "ECDHE-P256",
-            "vulnerability_type": "Shor's Algorithm",
-            "risk": "High",
-            "source": "192.168.1.100:52365",
-            "destination": "172.217.169.36:443",
-            "port": 443,
-            "certificate": "*.google.com",
-            "cipher_suite": "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-            "key_exchange": "ECDHE",
-            "encryption": "AES-128-GCM",
-            "signature": "RSA",
-            "session_id": "TLS-1-1",
-            "description": "ECDHE using curve P-256 is vulnerable to quantum attacks using Shor's algorithm",
-            "recommendation": "Upgrade to post-quantum key exchange like CRYSTALS-Kyber"
-        },
-        {
-            "protocol": "TLS",
-            "algorithm": "DHE-2048",
-            "vulnerability_type": "Shor's Algorithm",
-            "risk": "High",
-            "source": "192.168.1.100:52366",
-            "destination": "104.21.25.84:443",
-            "port": 443,
-            "certificate": "*.cloudflare.com",
-            "cipher_suite": "TLS_DHE_RSA_WITH_AES_256_GCM_SHA384",
-            "key_exchange": "DHE",
-            "encryption": "AES-256-GCM",
-            "signature": "RSA",
-            "session_id": "TLS-1-2",
-            "description": "DHE using 2048-bit parameters is vulnerable to quantum attacks using Shor's algorithm",
-            "recommendation": "Upgrade to post-quantum key exchange algorithms"
-        }
-    ])
-    
-    # SSH connections
-    results.extend([
-        {
-            "protocol": "SSH",
-            "algorithm": "RSA-2048",
-            "vulnerability_type": "Shor's Algorithm",
-            "risk": "High",
-            "source": "192.168.1.100:58472",
-            "destination": "198.51.100.5:22",
-            "port": 22,
-            "key_exchange": "diffie-hellman-group14-sha1",
-            "host_key": "ssh-rsa",
-            "encryption": "aes128-ctr",
-            "session_id": "SSH-1-0",
-            "description": "SSH server using RSA-2048 host key is vulnerable to quantum attacks",
-            "recommendation": "Upgrade to SSH with post-quantum host keys"
-        },
-        {
-            "protocol": "SSH",
-            "algorithm": "ECDSA-P256",
-            "vulnerability_type": "Shor's Algorithm",
-            "risk": "High",
-            "source": "192.168.1.100:58473",
-            "destination": "198.51.100.6:22",
-            "port": 22,
-            "key_exchange": "ecdh-sha2-nistp256",
-            "host_key": "ecdsa-sha2-nistp256",
-            "encryption": "aes256-ctr",
-            "session_id": "SSH-1-1",
-            "description": "SSH server using ECDSA with curve P-256 is vulnerable to quantum attacks",
-            "recommendation": "Upgrade to SSH with post-quantum algorithms"
-        }
-    ])
-    
-    # IPsec/IKE connections
-    results.extend([
-        {
-            "protocol": "IPsec/IKE",
-            "algorithm": "DH-Group14",
-            "vulnerability_type": "Shor's Algorithm",
-            "risk": "High",
-            "source": "192.168.1.100:500",
-            "destination": "203.0.113.10:500",
-            "port": 500,
-            "encryption": "AES-CBC-256",
-            "integrity": "HMAC-SHA-256-128",
-            "dh_group": "14 (2048-bit MODP)",
-            "session_id": "IKE-1-0",
-            "description": "IKE using Diffie-Hellman Group 14 (2048-bit) is vulnerable to quantum attacks",
-            "recommendation": "Upgrade to IKEv2 with quantum-resistant key exchange"
-        },
-        {
-            "protocol": "IPsec/IKE",
-            "algorithm": "DH-Group19",
-            "vulnerability_type": "Shor's Algorithm",
-            "risk": "High",
-            "source": "192.168.1.100:500",
-            "destination": "203.0.113.11:500",
-            "port": 500,
-            "encryption": "AES-GCM-256",
-            "integrity": "AES-GMAC",
-            "dh_group": "19 (256-bit ECP)",
-            "session_id": "IKE-1-1",
-            "description": "IKE using Diffie-Hellman Group 19 (256-bit ECP) is vulnerable to quantum attacks",
-            "recommendation": "Upgrade to IKEv2 with post-quantum key exchange algorithms"
-        }
-    ])
-    
-    response_data = {
-        "status": "success",
-        "scan_type": "network_demo",
-        "session_count": len(results),
-        "vulnerable_count": sum(1 for r in results if r.get("risk") in ["High", "Critical"]),
-        "safe_count": sum(1 for r in results if r.get("risk") not in ["High", "Critical", "Medium"]),
-        "results": results
-    }
-    
-    return jsonify(response_data) 
+    return network_analyzer.get_demo_analysis() 
