@@ -291,7 +291,9 @@ const ScannerApp: React.FC = () => {
     setDirectory(null);
     setScanResults(null);
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/scan/demo');
+      // Construct the API URL using the environment variable
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001'; // Fallback for local dev
+      const response = await fetch(`${apiUrl}/api/scan/demo`);
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Demo scan failed with status: ${response.status}. ${errorText}`);
