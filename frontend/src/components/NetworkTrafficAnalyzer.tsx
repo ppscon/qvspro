@@ -37,7 +37,8 @@ const NetworkTrafficAnalyzer: React.FC<NetworkTrafficAnalyzerProps> = ({ darkMod
   // Function to fetch available network interfaces
   const fetchNetworkInterfaces = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/network/interfaces');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001'; // Use env var
+      const response = await fetch(`${apiUrl}/api/network/interfaces`);
       if (!response.ok) {
         throw new Error(`Failed to fetch network interfaces: ${response.status}`);
       }
@@ -88,7 +89,8 @@ const NetworkTrafficAnalyzer: React.FC<NetworkTrafficAnalyzerProps> = ({ darkMod
     setStatusMessage('Loading network traffic demo analysis...');
 
     try {
-      const response = await fetch('http://127.0.0.1:5001/api/network/demo');
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001'; // Use env var
+      const response = await fetch(`${apiUrl}/api/network/demo`);
       if (!response.ok) {
         throw new Error(`Demo failed with status: ${response.status}`);
       }
@@ -125,6 +127,7 @@ const NetworkTrafficAnalyzer: React.FC<NetworkTrafficAnalyzerProps> = ({ darkMod
 
     try {
       let response;
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001'; // Use env var
       
       if (captureMethod === 'pcap') {
         // Create form data for file upload
@@ -132,13 +135,13 @@ const NetworkTrafficAnalyzer: React.FC<NetworkTrafficAnalyzerProps> = ({ darkMod
         formData.append('pcap_file', pcapFile as File);
         
         // Send PCAP file to backend for analysis
-        response = await fetch('http://127.0.0.1:5001/api/network/analyze-pcap', {
+        response = await fetch(`${apiUrl}/api/network/analyze-pcap`, {
           method: 'POST',
           body: formData,
         });
       } else {
         // Send live capture request to backend
-        response = await fetch('http://127.0.0.1:5001/api/network/capture', {
+        response = await fetch(`${apiUrl}/api/network/capture`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
