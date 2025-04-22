@@ -1,5 +1,5 @@
 # Go
-/scanner/qvs-pro
+# /scanner/qvs-pro # Commented out to include binary
 *.exe
 *.exe~
 *.dll
