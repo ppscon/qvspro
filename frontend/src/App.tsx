@@ -239,7 +239,9 @@ const ScannerApp: React.FC = () => {
         formData.append('directory', directory || '');
       }
 
-      const response = await fetch('http://127.0.0.1:5001/api/scan/', {
+      // Construct the API URL using the environment variable
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001'; // Fallback for local dev
+      const response = await fetch(`${apiUrl}/api/scan/`, {
         method: 'POST',
         body: formData,
       });
