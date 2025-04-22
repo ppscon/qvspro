@@ -1,5 +1,5 @@
 # Go
-# /scanner/qvs-pro # Commented out to include binary
+/scanner/qvs-pro # Temporarily uncommented to include Linux binary
 *.exe
 *.exe~
 *.dll
