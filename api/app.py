@@ -57,6 +57,15 @@ def serve(path):
         return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
-    # Run without debug mode to avoid "Too many open files" error
-    app.run(debug=False, port=5001, host='0.0.0.0', 
-           extra_files=None if os.environ.get('FLASK_DEBUG') != '1' else extra_files)
+    # Get port from environment variable or default to 5001
+    port = int(os.environ.get('PORT', 5001))
+    
+    # Determine extra_files based on FLASK_DEBUG
+    extra_files_list = None
+    if os.environ.get('FLASK_DEBUG') == '1':
+        # Assuming extra_files is calculated earlier in the script as before
+        extra_files_list = extra_files 
+        
+    # Run without debug mode for production, use calculated port
+    app.run(debug=False, port=port, host='0.0.0.0', 
+           extra_files=extra_files_list)
