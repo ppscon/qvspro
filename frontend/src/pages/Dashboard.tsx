@@ -37,7 +37,7 @@ const Dashboard: React.FC = () => {
     try {
       const { data, error: fetchError } = await supabase
         .from('scan_records')
-        .select('id, name, description, created_at, status, vulnerabilities_count')
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 

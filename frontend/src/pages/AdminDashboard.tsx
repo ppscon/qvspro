@@ -4,7 +4,7 @@ import { FiUser, FiShield, FiArrowLeft, FiUserPlus, FiUserX, FiCheck, FiAlertCir
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import Footer from '../components/Footer';
-import Header from '../../components/Header';
+import Header from '../components/Header';
 
 interface BetaUser {
   id: string;

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
 import { FiMail, FiLock, FiAlertCircle, FiArrowRight, FiUser } from 'react-icons/fi';
+import { FaGithub } from 'react-icons/fa';
+import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
 
 interface AuthProps {
@@ -17,17 +18,7 @@ export const Auth: React.FC<AuthProps> = ({ redirectTo = '/app' }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   
-  const { signIn, signUp, resetPassword, session } = useAuth();
-  const history = useHistory();
-  const location = useLocation<{ from: Location }>();
-
-  useEffect(() => {
-    // If user is already logged in, redirect
-    if (session) {
-      const { from } = location.state || { from: { pathname: "/app" } };
-      history.replace(from);
-    }
-  }, [session, history, location]);
+  const { signIn, signUp, resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,9 +54,15 @@ export const Auth: React.FC<AuthProps> = ({ redirectTo = '/app' }) => {
   };
 
   const handleGitHubLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
-    if (error) {
-      setError(error.message);
+    setError(null);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+      });
+      if (error) throw error;
+      // Supabase handles the redirect
+    } catch (error: any) {
+      setError(error.message || 'Error logging in with GitHub');
     }
   };
 
@@ -222,21 +219,13 @@ export const Auth: React.FC<AuthProps> = ({ redirectTo = '/app' }) => {
           </div>
         </form>
 
-        <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with</span>
-          </div>
-        </div>
-
-        <div>
+        <div className="mt-4">
           <button
+            type="button"
             onClick={handleGitHubLogin}
             className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-500 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600"
           >
-            <FiGithub className="h-5 w-5 mr-2" />
+            <FaGithub className="h-5 w-5 mr-2" />
             Sign in with GitHub
           </button>
         </div>
