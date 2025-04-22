@@ -28,7 +28,7 @@ app = Flask(__name__, static_folder='../frontend/build', static_url_path='/')
 # Configure CORS for specific origins
 CORS(app, resources={r"/api/*": {"origins": [
     "http://localhost:3000", 
-    "https://your-qvs-pro-app.vercel.app" # <-- TODO: Replace with your actual Vercel URL
+    "https://qvspro.app" # Added the deployed frontend origin
 ]}})
 
 # Configure Flask to avoid "Too many open files" error
