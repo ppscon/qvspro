@@ -1,9 +1,0 @@
-security:
-  encryption:
-    algorithm: AES
-    key_size: 256
-  signature:
-    algorithm: RSA
-    key_size: 2048
-  hash:
-    algorithm: SHA-256
