@@ -8,3 +8,4 @@ psutil==5.9.4
 pyjwt==2.6.0
 cryptography==41.0.3
 pyparsing==3.0.9
+gunicorn
