@@ -1,0 +1,50 @@
+# Backend code (will be deployed separately)
+/api
+/scanner
+
+# Development files
+/node_modules
+/.git
+/.github
+.DS_Store
+*.log
+
+# Resources and research
+/resources
+/research
+*.pdf
+*.key
+*.pem
+*.cert
+*.p12
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation that doesn't need to be deployed
+/docs
+README.md
+CONTRIBUTING.md
+LICENSE
+
+# Test files
+/test
+/tests
+/frontend/src/**/*.test.tsx
+/frontend/src/**/*.test.ts
+/frontend/src/**/*.spec.tsx
+/frontend/src/**/*.spec.ts
+
+# Environment files (except vercel.json which configures the deployment)
+.env*
+!vercel.json
+
+# Scripts
+/scripts
+
+# Build artifacts
+/dist
+/.next
+/.vercel 

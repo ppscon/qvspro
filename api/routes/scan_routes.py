@@ -84,3 +84,42 @@ def scan_files():
 def scan_status(scan_id):
     # Future implementation for background scanning
     return jsonify({"status": "not_implemented"})
+
+@scan_bp.route('/demo', methods=['GET'])
+def scan_demo():
+    # Path to the built-in test directory
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    api_dir = os.path.dirname(current_dir)
+    project_dir = os.path.dirname(api_dir)
+    test_dir = os.path.join(project_dir, 'Data', 'qvs_sample_files')
+    scanner_path = os.path.join(project_dir, 'scanner', 'qvs-pro')
+
+    if not os.path.exists(scanner_path):
+        return jsonify({"error": f"Scanner executable not found at {scanner_path}"}), 500
+    if not os.path.exists(test_dir):
+        return jsonify({"error": f"Test directory not found at {test_dir}"}), 500
+
+    # Run the scanner with JSON output on the test directory
+    cmd = [scanner_path, '-dir', test_dir, '-json']
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        return jsonify({
+            "error": f"Scanner exited with code {result.returncode}",
+            "details": result.stderr
+        }), 500
+
+    try:
+        scan_results = json.loads(result.stdout)
+        return jsonify({
+            "status": "success",
+            "scan_type": "demo",
+            "vulnerabilities_count": len(scan_results),
+            "scanned_files": os.listdir(test_dir),
+            "results": scan_results
+        })
+    except json.JSONDecodeError:
+        return jsonify({
+            "error": "Failed to parse scanner output",
+            "raw_output": result.stdout
+        }), 500

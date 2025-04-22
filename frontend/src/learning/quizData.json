@@ -1,0 +1,392 @@
+[
+  {
+    "moduleNumber": 1,
+    "title": "Understanding the Quantum Revolution and Its Impact on Cryptography",
+    "quizzes": [
+      {
+        "question": "Which quantum phenomena are fundamental to how quantum computers perform calculations differently from classical computers?",
+        "options": [
+          "Superposition and Entanglement",
+          "Diffraction and Interference",
+          "Thermodynamics and Kinetics",
+          "Relativity and Gravity"
+        ],
+        "correctAnswer": "Superposition and Entanglement",
+        "explanation": "Module 1 introduces superposition and entanglement as key quantum phenomena leveraged by quantum computers for their unique computational power."
+      },
+      {
+        "question": "What is the primary role of Public-Key Cryptography (PKC) in modern digital security as described in Module 1?",
+        "options": [
+          "Compressing large data files",
+          "Securing communications, data, and authentication",
+          "Detecting computer viruses",
+          "Optimizing network traffic"
+        ],
+        "correctAnswer": "Securing communications, data, and authentication",
+        "explanation": "Module 1 explains that PKC is crucial for securing communications, data, and authentication in our digital world."
+      },
+      {
+        "question": "According to Module 1, the potential capabilities of quantum computing pose a significant threat to:",
+        "options": [
+          "Only outdated computer hardware",
+          "Established cryptographic foundations",
+          "Only symmetric encryption algorithms",
+          "The physical security of data centers"
+        ],
+        "correctAnswer": "Established cryptographic foundations",
+        "explanation": "Module 1 highlights that while still emerging, quantum computing's potential poses a significant threat to the cryptographic methods we currently rely on."
+      }
+    ]
+  },
+  {
+    "moduleNumber": 2,
+    "title": "The Existential Threat: How Quantum Computers Can Break Current Cryptography",
+    "quizzes": [
+      {
+        "question": "Which quantum algorithm specifically threatens widely used public-key cryptosystems like RSA and ECC?",
+        "options": [
+          "Grover's Algorithm",
+          "Shor's Algorithm",
+          "Deutsch-Jozsa Algorithm",
+          "Quantum Annealing"
+        ],
+        "correctAnswer": "Shor's Algorithm",
+        "explanation": "Module 2 details Shor's algorithm's theoretical ability to efficiently break the mathematical problems underlying RSA and ECC."
+      },
+      {
+        "question": "What does 'CRQC' stand for in the context of quantum threats?",
+        "options": [
+          "Classically Resistant Quantum Code",
+          "Cryptographically Resilient Quantum Computer",
+          "Computationally Relevant Quantum Chip",
+          "Cryptanalytically Relevant Quantum Computer"
+        ],
+        "correctAnswer": "Cryptanalytically Relevant Quantum Computer",
+        "explanation": "Module 2 defines a CRQC as a quantum computer powerful enough to break current cryptographic standards like RSA and ECC."
+      },
+      {
+        "question": "How does Grover's algorithm primarily affect symmetric encryption algorithms like AES?",
+        "options": [
+          "It makes them instantly breakable",
+          "It offers no advantage over classical attacks",
+          "It provides a quadratic speedup for brute-force key searches",
+          "It strengthens them against quantum attacks"
+        ],
+        "correctAnswer": "It provides a quadratic speedup for brute-force key searches",
+        "explanation": "Module 2 explains that Grover's algorithm offers a quadratic speedup for key searches, effectively halving the security strength (e.g., AES-256 becomes like AES-128 against this attack)."
+      }
+    ]
+  },
+  {
+    "moduleNumber": 3,
+    "title": "The Immediate Concern: The \"Harvest Now, Decrypt Later\" (HNDL) Threat",
+    "quizzes": [
+      {
+        "question": "What is the core idea behind the \"Harvest Now, Decrypt Later\" (HNDL) threat?",
+        "options": [
+          "Encrypting data only when a quantum computer is available",
+          "A method for improving data harvesting efficiency",
+          "Adversaries storing currently encrypted data to decrypt it later with future quantum computers",
+          "Decrypting historical data using classical computers before quantum computers arrive"
+        ],
+        "correctAnswer": "Adversaries storing currently encrypted data to decrypt it later with future quantum computers",
+        "explanation": "Module 3 defines HNDL as the scenario where adversaries collect encrypted data today, anticipating the ability to decrypt it once capable quantum computers (CRQCs) exist."
+      },
+      {
+        "question": "Why does the HNDL threat make the quantum risk an *immediate* concern, even if CRQCs don't exist yet?",
+        "options": [
+          "Because Shor's algorithm can already be run on classical computers",
+          "Because the act of harvesting sensitive, long-lived data can happen today",
+          "Because symmetric encryption is already obsolete",
+          "Because international regulations require immediate PQC deployment"
+        ],
+        "correctAnswer": "Because the act of harvesting sensitive, long-lived data can happen today",
+        "explanation": "Module 3 emphasizes the immediacy because data needing long-term confidentiality (e.g., government secrets, PII) intercepted today remains vulnerable to future decryption."
+      },
+      {
+        "question": "For which type of data is the HNDL risk particularly significant?",
+        "options": [
+          "Temporary internet cookies",
+          "Publicly broadcast television shows",
+          "Data requiring long-term confidentiality (e.g., PII, financial records, state secrets)",
+          "Real-time traffic updates"
+        ],
+        "correctAnswer": "Data requiring long-term confidentiality (e.g., PII, financial records, state secrets)",
+        "explanation": "Module 3 highlights that data needing to remain secret for many years is most at risk from HNDL attacks."
+      }
+    ]
+  },
+  {
+    "moduleNumber": 4,
+    "title": "The Global Response: The Post-Quantum Cryptography (PQC) Imperative",
+    "quizzes": [
+      {
+        "question": "What is Post-Quantum Cryptography (PQC)?",
+        "options": [
+          "Cryptography that only runs on quantum computers",
+          "Algorithms designed to run on classical computers but resist attacks from both classical and quantum computers",
+          "A temporary fix until quantum computers become stable",
+          "A theoretical concept with no practical algorithms yet"
+        ],
+        "correctAnswer": "Algorithms designed to run on classical computers but resist attacks from both classical and quantum computers",
+        "explanation": "Module 4 defines PQC as new cryptographic methods secure against future quantum threats but implementable on current hardware."
+      },
+      {
+        "question": "Which US agency is leading the effort to standardize PQC algorithms?",
+        "options": [
+          "NSA (National Security Agency)",
+          "NIST (National Institute of Standards and Technology)",
+          "DARPA (Defense Advanced Research Projects Agency)",
+          "CISA (Cybersecurity and Infrastructure Security Agency)"
+        ],
+        "correctAnswer": "NIST (National Institute of Standards and Technology)",
+        "explanation": "Module 4 explicitly mentions NIST's role in the PQC standardization process in the United States."
+      },
+      {
+        "question": "How is the global transition to PQC generally characterized in Module 4?",
+        "options": [
+          "As a minor software patch update",
+          "As straightforward and quick",
+          "As an exceptionally complex, resource-intensive, and lengthy undertaking",
+          "As optional for most organizations"
+        ],
+        "correctAnswer": "As an exceptionally complex, resource-intensive, and lengthy undertaking",
+        "explanation": "Module 4 stresses that migrating to PQC is a significant global challenge, far exceeding previous crypto transitions in complexity and scope."
+      }
+    ]
+  },
+  {
+    "moduleNumber": 5,
+    "title": "Navigating the Complexity: Challenges of PQC Migration",
+    "quizzes": [
+      {
+        "question": "Which of these is listed as a major challenge in PQC migration?",
+        "options": [
+          "Finding enough classical computing power",
+          "PQC algorithms having larger key/signature sizes impacting performance",
+          "Lack of international cooperation on standards",
+          "PQC algorithms being too simple to implement securely"
+        ],
+        "correctAnswer": "PQC algorithms having larger key/signature sizes impacting performance",
+        "explanation": "Module 5 details several challenges, including the performance and resource costs associated with larger key and signature sizes in many PQC algorithms."
+      },
+      {
+        "question": "What is identified as the 'first and most critical step' for organizations beginning PQC migration?",
+        "options": [
+          "Hiring quantum physicists",
+          "Achieving comprehensive cryptographic visibility through discovery and inventory",
+          "Immediately disabling all RSA and ECC encryption",
+          "Waiting for quantum computers to become commercially available"
+        ],
+        "correctAnswer": "Achieving comprehensive cryptographic visibility through discovery and inventory",
+        "explanation": "Module 5 emphasizes that understanding where vulnerable cryptography exists (discovery and inventory) is the essential starting point."
+      },
+      {
+        "question": "What is a 'Cryptographic Bill of Materials' (CBOM) in the context of PQC migration?",
+        "options": [
+          "A list of approved PQC algorithms",
+          "A standardized cost estimate for PQC migration",
+          "A formal inventory of all cryptographic assets and their configurations within an organization",
+          "A manual explaining cryptographic principles"
+        ],
+        "correctAnswer": "A formal inventory of all cryptographic assets and their configurations within an organization",
+        "explanation": "Module 5 describes the CBOM as a crucial output of the discovery process, formalizing the cryptographic inventory needed for migration planning."
+      }
+    ]
+  },
+  {
+    "moduleNumber": 6,
+    "title": "Understanding the Solutions: NIST Standardized PQC Algorithms",
+    "quizzes": [
+      {
+        "question": "Which algorithm was standardized by NIST (FIPS 203) primarily for general-purpose public-key encryption and key establishment?",
+        "options": [
+          "ML-DSA (CRYSTALS-Dilithium)",
+          "SLH-DSA (SPHINCS+)",
+          "ML-KEM (CRYSTALS-Kyber)",
+          "AES (Advanced Encryption Standard)"
+        ],
+        "correctAnswer": "ML-KEM (CRYSTALS-Kyber)",
+        "explanation": "Module 6 identifies ML-KEM (FIPS 203 / CRYSTALS-Kyber) as the primary NIST standard for key establishment (KEM)."
+      },
+      {
+        "question": "What is the primary purpose of the NIST standard ML-DSA (FIPS 204 / CRYSTALS-Dilithium)?",
+        "options": [
+          "Hashing data",
+          "Symmetric encryption",
+          "Digital signatures",
+          "Key establishment"
+        ],
+        "correctAnswer": "Digital signatures",
+        "explanation": "Module 6 specifies that ML-DSA (FIPS 204 / CRYSTALS-Dilithium) is NIST's primary standard for digital signatures."
+      },
+      {
+        "question": "What type of algorithm is SLH-DSA (FIPS 205 / SPHINCS+), and what is its intended role?",
+        "options": [
+          "Lattice-based KEM for primary use",
+          "Code-based signature for embedded systems",
+          "Stateless hash-based signature, intended as a backup",
+          "Symmetric block cipher for bulk encryption"
+        ],
+        "correctAnswer": "Stateless hash-based signature, intended as a backup",
+        "explanation": "Module 6 describes SLH-DSA (SPHINCS+) as a stateless hash-based digital signature algorithm, distinct from the lattice-based primary standards, and intended as a backup."
+      }
+    ]
+  },
+  {
+    "moduleNumber": 7,
+    "title": "Preparing for the Transition: Risk Assessment and Migration Planning",
+    "quizzes": [
+      {
+        "question": "Why is performing a risk assessment crucial before starting PQC migration?",
+        "options": [
+          "To choose which programming languages to use",
+          "To satisfy NIST's requirement for algorithm selection",
+          "To effectively prioritize migration efforts based on factors like data sensitivity and asset criticality",
+          "To determine the exact arrival date of a CRQC"
+        ],
+        "correctAnswer": "To effectively prioritize migration efforts based on factors like data sensitivity and asset criticality",
+        "explanation": "Module 7 explains that risk assessment helps organizations focus their PQC migration efforts on the most critical systems and data first."
+      },
+      {
+        "question": "What is the concept of 'crypto-agility' and why is it important for PQC migration?",
+        "options": [
+          "The ability of quantum computers to break multiple encryption algorithms",
+          "The flexibility to quickly swap cryptographic algorithms without major system changes",
+          "The portability of cryptographic code between different platforms",
+          "The speed at which quantum computers can perform cryptographic operations"
+        ],
+        "correctAnswer": "The flexibility to quickly swap cryptographic algorithms without major system changes",
+        "explanation": "Module 7 describes crypto-agility as the architectural approach allowing systems to easily change cryptographic algorithms - crucial for adapting to evolving standards and threats."
+      },
+      {
+        "question": "Which migration approach involves simultaneously running both traditional and post-quantum algorithms and combining their outputs?",
+        "options": [
+          "Hybrid approach",
+          "Parallel processing",
+          "Dual implementation",
+          "Composite encryption"
+        ],
+        "correctAnswer": "Hybrid approach",
+        "explanation": "Module 7 defines the hybrid approach as combining the security of both current and quantum-resistant algorithms during the transition period."
+      }
+    ]
+  },
+  {
+    "moduleNumber": 8,
+    "title": "Implementing the Solutions: Integrating PQC Readiness",
+    "quizzes": [
+      {
+        "question": "What does the \"Shift Left\" principle mean in the context of integrating PQC readiness into DevSecOps?",
+        "options": [
+          "Moving security testing to the end of the development cycle",
+          "Integrating security considerations and checks earlier in the development lifecycle",
+          "Shifting development teams to the political left",
+          "Using left-handed programmers for PQC implementation"
+        ],
+        "correctAnswer": "Integrating security considerations and checks earlier in the development lifecycle",
+        "explanation": "Module 8 applies the 'Shift Left' principle to PQC, meaning PQC vulnerabilities should be identified and addressed early in development, not just before deployment."
+      },
+      {
+        "question": "Which of the following are mentioned as key integration points for PQC readiness in DevSecOps workflows?",
+        "options": [
+          "Annual employee security awareness training",
+          "Physical security access controls",
+          "IDE plugins for developers and CI/CD pipeline integration for automated checks",
+          "Customer support helpdesk scripts"
+        ],
+        "correctAnswer": "IDE plugins for developers and CI/CD pipeline integration for automated checks",
+        "explanation": "Module 8 highlights practical integration points like IDE plugins (immediate feedback for developers) and CI/CD pipelines (automated scanning/policy enforcement)."
+      },
+      {
+        "question": "Besides identifying vulnerable cryptography, what else is crucial for facilitating effective PQC migration, according to Module 8?",
+        "options": [
+          "A detailed report on quantum physics breakthroughs",
+          "Actionable remediation guidance and a comprehensive CBOM",
+          "A company-wide mandate to use only PQC algorithms immediately",
+          "A list of competing organizations' PQC strategies"
+        ],
+        "correctAnswer": "Actionable remediation guidance and a comprehensive CBOM",
+        "explanation": "Module 8 stresses that just finding issues isn't enough; developers and operations teams need clear guidance on how to fix them, supported by a comprehensive cryptographic inventory (CBOM)."
+      }
+    ]
+  },
+  {
+    "moduleNumber": 9,
+    "title": "The Role of Tools: Quantum Vulnerability Scanning and PQC Migration Platforms",
+    "quizzes": [
+      {
+        "question": "What types of tools are specifically mentioned as emerging to help organizations with the PQC transition?",
+        "options": [
+          "Quantum circuit simulators",
+          "AI-powered code refactoring engines",
+          "Quantum vulnerability scanners and PQC migration platforms",
+          "Advanced firewall appliances"
+        ],
+        "correctAnswer": "Quantum vulnerability scanners and PQC migration platforms",
+        "explanation": "Module 9 provides an overview of tools specifically designed to find quantum-vulnerable cryptography and manage the migration process."
+      },
+      {
+        "question": "Which category of vendor is mentioned as potentially offering PQC transition assistance tools?",
+        "options": [
+          "Cloud infrastructure providers (like AWS, Azure, GCP)",
+          "Office productivity software vendors (like Microsoft Office)",
+          "PKI/Certificate Lifecycle Management (CLM) vendors and HSM vendors",
+          "Database management system vendors (like Oracle, PostgreSQL)"
+        ],
+        "correctAnswer": "PKI/Certificate Lifecycle Management (CLM) vendors and HSM vendors",
+        "explanation": "Module 9 lists PKI/CLM vendors, HSM vendors, and broader cryptographic discovery/management platforms as categories of vendors involved in providing PQC tools."
+      },
+      {
+        "question": "According to Module 9, what is a likely feature of PQC migration platforms?",
+        "options": [
+          "Providing quantum computing time slices",
+          "Generating CBOMs and offering risk assessment capabilities",
+          "Automatically converting classical algorithms to quantum algorithms",
+          "Offering discounts on quantum-resistant hardware"
+        ],
+        "correctAnswer": "Generating CBOMs and offering risk assessment capabilities",
+        "explanation": "Module 9 highlights typical features such as discovery scope, CBOM generation, risk assessment, PQC algorithm support, remediation guidance, and DevSecOps integration."
+      }
+    ]
+  },
+  {
+    "moduleNumber": 10,
+    "title": "Looking Ahead: The Evolving Landscape of Quantum Security",
+    "quizzes": [
+      {
+        "question": "What does Module 10 suggest about the state of PQC standards?",
+        "options": [
+          "The first set of standards (like ML-KEM, ML-DSA) are final and unlikely to change",
+          "The field is static, and no new algorithms are expected",
+          "PQC standards are likely to continue evolving, with potential new algorithms or advancements",
+          "Organizations should wait for the second round of standards before acting"
+        ],
+        "correctAnswer": "PQC standards are likely to continue evolving, with potential new algorithms or advancements",
+        "explanation": "Module 10 points towards the ongoing nature of PQC development and standardization, implying future changes or additions are possible."
+      },
+      {
+        "question": "What capability is emphasized as crucial for organizations to adapt to future cryptographic changes?",
+        "options": [
+          "Quantum entanglement communication",
+          "Crypto-agility",
+          "Blockchain immutability",
+          "Predictive analytics"
+        ],
+        "correctAnswer": "Crypto-agility",
+        "explanation": "Module 10 reiterates the importance of crypto-agility – the ability for an organization to easily switch or update cryptographic algorithms as needed."
+      },
+      {
+        "question": "What is the concluding message regarding the transition to a quantum-safe future?",
+        "options": [
+          "It's a one-time project completed once NIST standards are implemented",
+          "It requires ongoing vigilance, strategic planning, and proactive adaptation",
+          "The threat is minimal and requires little immediate action",
+          "Only governments need to be concerned"
+        ],
+        "correctAnswer": "It requires ongoing vigilance, strategic planning, and proactive adaptation",
+        "explanation": "Module 10 concludes by emphasizing that achieving and maintaining quantum safety is an ongoing process requiring continuous effort and adaptation."
+      }
+    ]
+  }
+]
