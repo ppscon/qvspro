@@ -1,5 +1,5 @@
 # Go
-/scanner/qvs-pro # Temporarily uncommented to include Linux binary
+# /scanner/qvs-pro # Re-commented after adding Linux binary
 *.exe
 *.exe~
 *.dll
@@ -108,6 +108,7 @@ Thumbs.db
 # Resources and research files
 /resources/
 /research/
+/Data/ # Added to ignore restored Data dir
 *.pdf
 *.key
 *.pem
@@ -144,3 +145,6 @@ clean-secrets.py
 scripts/
 untitled folder/
 # Dockerfile # Add this if Dockerfile is not needed in the repo
+
+# Ignore root requirements.txt if not used
+/requirements.txt
