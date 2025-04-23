@@ -108,7 +108,6 @@ Thumbs.db
 # Resources and research files
 /resources/
 /research/
-/Data/ # Added to ignore restored Data dir
 *.pdf
 *.key
 *.pem
