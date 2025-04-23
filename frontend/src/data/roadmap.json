@@ -1,9 +1,9 @@
 {
   "categories": [
     {
-      "id": "auth",
-      "title": "Authentication and User Management",
-      "description": "User authentication, roles, and access control",
+      "id": "core-foundation",
+      "title": "Core Foundation",
+      "description": "Essential platform building blocks and architecture",
       "tasks": [
         {
           "id": "auth-1",
@@ -44,43 +44,378 @@
           "status": "Not Started",
           "phase": 3,
           "notes": ""
+        },
+        {
+          "id": "arch-1",
+          "title": "Scalable Microservices Backend",
+          "description": "Design and implement microservices architecture",
+          "category": "architecture",
+          "priority": "High",
+          "status": "In Progress",
+          "phase": 1,
+          "notes": "Initial design completed"
+        },
+        {
+          "id": "arch-2",
+          "title": "Cloud-Native Deployment",
+          "description": "Containerization and cloud deployment model",
+          "category": "architecture",
+          "priority": "Medium",
+          "status": "In Progress",
+          "phase": 2,
+          "notes": "Docker configuration in progress"
+        },
+        {
+          "id": "arch-3",
+          "title": "API-First Approach",
+          "description": "Develop API-first design for integration capabilities",
+          "category": "architecture",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 2,
+          "notes": ""
+        },
+        {
+          "id": "arch-4",
+          "title": "Optimized Scanning Engine",
+          "description": "Efficient scanning for large codebases and systems",
+          "category": "architecture",
+          "priority": "High",
+          "status": "In Progress",
+          "phase": 1,
+          "notes": "Performance testing needed"
         }
       ]
     },
     {
-      "id": "scanner",
-      "title": "Source Code Scanner",
-      "description": "Core scanning functionality",
+      "id": "discovery-inventory",
+      "title": "Discovery and Inventory Modules",
+      "description": "Scanning and detection capabilities across different assets",
       "tasks": [
         {
           "id": "scanner-1",
           "title": "Multi-Language Support",
-          "description": "Add support for Java, Python, Go, C++, JavaScript",
-          "category": "scanner",
+          "description": "Support for Java, Python, Go, C++, JavaScript scanning",
+          "category": "source-code-scanner",
           "priority": "High",
           "status": "Complete",
           "phase": 1,
-          "notes": "Successfully implemented basic scanning for multiple languages"
+          "notes": "All major languages now supported"
         },
         {
           "id": "scanner-2",
           "title": "Cryptographic API Detection",
-          "description": "Detect cryptographic API calls and libraries",
-          "category": "scanner",
-          "priority": "High",
-          "status": "Complete",
+          "description": "Detection of cryptographic API calls and libraries",
+          "category": "source-code-scanner",
+          "priority": "Critical",
+          "status": "In Progress",
           "phase": 1,
-          "notes": "Currently detects common crypto libraries and function calls"
+          "notes": "Java and Python detection complete"
         },
         {
           "id": "scanner-3",
           "title": "Key Size and Algorithm Parameters",
-          "description": "Identify key sizes and algorithm parameters",
-          "category": "scanner",
+          "description": "Identification of cryptographic parameters and key sizes",
+          "category": "source-code-scanner",
+          "priority": "High",
+          "status": "In Progress",
+          "phase": 1,
+          "notes": ""
+        },
+        {
+          "id": "scanner-4",
+          "title": "Repository Integration",
+          "description": "Support for scanning repository-hosted code",
+          "category": "source-code-scanner",
           "priority": "Medium",
+          "status": "Not Started",
+          "phase": 2,
+          "notes": ""
+        },
+        {
+          "id": "binary-1",
+          "title": "Compiled Code Analysis",
+          "description": "Analysis capabilities for compiled binaries",
+          "category": "binary-analyzer",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 2,
+          "notes": ""
+        },
+        {
+          "id": "binary-2",
+          "title": "Firmware Image Scanning",
+          "description": "Scanning capabilities for IoT and embedded firmware",
+          "category": "binary-analyzer",
+          "priority": "Low",
+          "status": "Not Started",
+          "phase": 3,
+          "notes": ""
+        },
+        {
+          "id": "network-1",
+          "title": "TLS/SSL Configuration Scanning",
+          "description": "Analyze TLS/SSL configurations for vulnerabilities",
+          "category": "network-analyzer",
+          "priority": "High",
           "status": "In Progress",
           "phase": 2,
-          "notes": "Basic identification working, needs refinement"
+          "notes": ""
+        },
+        {
+          "id": "network-2",
+          "title": "Protocol Analysis",
+          "description": "Analysis of SSH, IPsec, VPN protocols",
+          "category": "network-analyzer",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 2,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "analysis-assessment",
+      "title": "Analysis and Risk Assessment",
+      "description": "Evaluation of quantum vulnerabilities and risk scoring",
+      "tasks": [
+        {
+          "id": "quantum-1",
+          "title": "Shor's Algorithm Impact Assessment",
+          "description": "Evaluate asymmetric cryptography against Shor's algorithm",
+          "category": "quantum-analysis",
+          "priority": "Critical",
+          "status": "In Progress",
+          "phase": 1,
+          "notes": "Initial assessment framework complete"
+        },
+        {
+          "id": "quantum-2",
+          "title": "Grover's Algorithm Impact Assessment",
+          "description": "Evaluate symmetric cryptography against Grover's algorithm",
+          "category": "quantum-analysis",
+          "priority": "High",
+          "status": "In Progress",
+          "phase": 1,
+          "notes": ""
+        },
+        {
+          "id": "quantum-3",
+          "title": "Key Size Adequacy Evaluation",
+          "description": "Analyze cryptographic key sizes against quantum attacks",
+          "category": "quantum-analysis",
+          "priority": "High",
+          "status": "In Progress",
+          "phase": 1,
+          "notes": ""
+        },
+        {
+          "id": "cbom-1",
+          "title": "Cryptographic Bill of Materials",
+          "description": "Generate comprehensive cryptographic inventory",
+          "category": "cbom",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 2,
+          "notes": ""
+        },
+        {
+          "id": "risk-1",
+          "title": "Risk Prioritization Engine",
+          "description": "Scoring system based on algorithm type and key size",
+          "category": "risk",
+          "priority": "High",
+          "status": "In Progress",
+          "phase": 2,
+          "notes": "Algorithm-based scoring implemented"
+        }
+      ]
+    },
+    {
+      "id": "remediation",
+      "title": "Remediation and Migration Planning",
+      "description": "Tools and guidance for quantum-safe migration",
+      "tasks": [
+        {
+          "id": "recommendation-1",
+          "title": "PQC Algorithm Mapping",
+          "description": "Map vulnerable algorithms to post-quantum alternatives",
+          "category": "recommendations",
+          "priority": "Critical",
+          "status": "In Progress",
+          "phase": 2,
+          "notes": "Initial mappings established"
+        },
+        {
+          "id": "recommendation-2",
+          "title": "NIST Standardized Replacements",
+          "description": "Specific suggestions based on NIST standards",
+          "category": "recommendations",
+          "priority": "High",
+          "status": "In Progress",
+          "phase": 2,
+          "notes": "Awaiting final NIST standardization"
+        },
+        {
+          "id": "guidance-1",
+          "title": "Remediation Instructions",
+          "description": "Step-by-step guidance with code examples",
+          "category": "guidance",
+          "priority": "High",
+          "status": "Not Started",
+          "phase": 2,
+          "notes": ""
+        },
+        {
+          "id": "compliance-1",
+          "title": "Migration Progress Tracking",
+          "description": "Monitor progress against migration goals",
+          "category": "compliance",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 3,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "integration",
+      "title": "Integration Ecosystem",
+      "description": "Connections with development and security tools",
+      "tasks": [
+        {
+          "id": "dev-integration-1",
+          "title": "CI/CD Pipeline Plugins",
+          "description": "Integration with GitHub Actions, Jenkins, GitLab CI",
+          "category": "dev-tools",
+          "priority": "High",
+          "status": "Not Started",
+          "phase": 2,
+          "notes": ""
+        },
+        {
+          "id": "dev-integration-2",
+          "title": "IDE Extensions",
+          "description": "Extensions for VS Code, IntelliJ, Eclipse",
+          "category": "dev-tools",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 3,
+          "notes": ""
+        },
+        {
+          "id": "security-integration-1",
+          "title": "SIEM Connectors",
+          "description": "Integration with security information systems",
+          "category": "security-tools",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 3,
+          "notes": ""
+        },
+        {
+          "id": "ticket-integration-1",
+          "title": "Jira Integration",
+          "description": "Create and track issues in Jira",
+          "category": "ticket-systems",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 3,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "user-experience",
+      "title": "User Experience",
+      "description": "Dashboard, reporting, and educational content",
+      "tasks": [
+        {
+          "id": "dashboard-1",
+          "title": "Interactive Dashboard",
+          "description": "Executive summary and technical drill-down views",
+          "category": "dashboard",
+          "priority": "High",
+          "status": "In Progress",
+          "phase": 1,
+          "notes": "Basic dashboard implemented"
+        },
+        {
+          "id": "education-1",
+          "title": "Quantum Computing Primer",
+          "description": "Educational content on quantum computing threats",
+          "category": "education",
+          "priority": "Medium",
+          "status": "Complete",
+          "phase": 1,
+          "notes": ""
+        },
+        {
+          "id": "education-2",
+          "title": "PQC Explainers",
+          "description": "Explanatory content on post-quantum cryptography",
+          "category": "education",
+          "priority": "Medium",
+          "status": "In Progress",
+          "phase": 1,
+          "notes": ""
+        },
+        {
+          "id": "reporting-1",
+          "title": "Customizable Reports",
+          "description": "Report templates with multiple export formats",
+          "category": "reporting",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 2,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "advanced-features",
+      "title": "Advanced Features",
+      "description": "Future capabilities for enterprise needs",
+      "tasks": [
+        {
+          "id": "testing-1",
+          "title": "PQC Algorithm Testing",
+          "description": "Performance and compatibility testing for PQC algorithms",
+          "category": "testing",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 3,
+          "notes": ""
+        },
+        {
+          "id": "policy-1",
+          "title": "Policy Management",
+          "description": "Custom policy creation and enforcement",
+          "category": "policy",
+          "priority": "Low",
+          "status": "Not Started",
+          "phase": 4,
+          "notes": ""
+        },
+        {
+          "id": "risk-modeling-1",
+          "title": "Financial Impact Estimation",
+          "description": "Calculate potential financial impact of quantum threats",
+          "category": "risk-modeling",
+          "priority": "Low",
+          "status": "Not Started",
+          "phase": 4,
+          "notes": ""
+        },
+        {
+          "id": "risk-modeling-2",
+          "title": "Harvest Now, Decrypt Later Assessment",
+          "description": "Evaluate risk of current data being decrypted in future",
+          "category": "risk-modeling",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 3,
+          "notes": ""
         }
       ]
     }
