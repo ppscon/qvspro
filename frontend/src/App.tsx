@@ -711,12 +711,12 @@ const ScannerApp: React.FC = () => {
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-gray-100 dark:bg-gray-700">
-                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">File</th>
-                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">Line</th>
-                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">Risk</th>
-                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">Vulnerability</th>
-                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">Description</th>
-                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600">Recommendation</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600 w-[30%] max-w-[30%]">File</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600 w-[8%]">Line</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600 w-[10%]">Risk</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600 w-[12%]">Vulnerability</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600 w-[20%]">Description</th>
+                      <th className="p-3 text-left text-gray-800 dark:text-gray-200 border-b border-gray-200 dark:border-gray-600 w-[20%]">Recommendation</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -725,13 +725,13 @@ const ScannerApp: React.FC = () => {
                         key={`result-${index}`}
                         className="hover:bg-gray-50 dark:hover:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
                       >
-                        <td className="p-3 text-gray-700 dark:text-gray-300">
-                          <span className="font-mono text-xs">{result.file_path || result.file || 'N/A'}</span>
+                        <td className="p-3 text-gray-700 dark:text-gray-300 w-[30%] max-w-[30%] truncate">
+                          <span className="font-mono text-xs overflow-hidden text-ellipsis">{result.file_path || result.file || 'N/A'}</span>
                         </td>
-                        <td className="p-3 text-gray-700 dark:text-gray-300">
+                        <td className="p-3 text-gray-700 dark:text-gray-300 w-[8%]">
                           {result.line_number || result.line || 'N/A'}
                         </td>
-                        <td className="p-3">
+                        <td className="p-3 w-[10%]">
                           <span
                             className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
                               (result.risk_level || result.risk) === 'Critical'
@@ -746,17 +746,23 @@ const ScannerApp: React.FC = () => {
                             {result.risk_level || result.risk || 'Unknown'}
                           </span>
                         </td>
-                        <td className="p-3 text-gray-700 dark:text-gray-300">
-                          {result.vulnerability_type || result.vulnerability || result.type || 'Unknown'}
+                        <td className="p-3 text-gray-700 dark:text-gray-300 w-[12%] truncate">
+                          <div className="overflow-hidden text-ellipsis">
+                            {result.vulnerability_type || result.vulnerability || result.type || 'Unknown'}
+                          </div>
                         </td>
-                        <td className="p-3 text-gray-700 dark:text-gray-300">
-                          {result.description || (result.algorithm ? `${result.algorithm} vulnerability` : 'No description provided')}
+                        <td className="p-3 text-gray-700 dark:text-gray-300 w-[20%] truncate">
+                          <div className="overflow-hidden text-ellipsis">
+                            {result.description || (result.algorithm ? `${result.algorithm} vulnerability` : 'No description provided')}
+                          </div>
                         </td>
-                        <td className="p-3 text-gray-700 dark:text-gray-300">
-                          {result.recommendation || 
-                            ((result.risk_level || result.risk) === 'High' ? 'Replace with post-quantum cryptography algorithm' : 
-                             (result.risk_level || result.risk) === 'Medium' ? 'Plan to upgrade to stronger cryptography' : 
-                             'Monitor for vulnerabilities')}
+                        <td className="p-3 text-gray-700 dark:text-gray-300 w-[20%] truncate">
+                          <div className="overflow-hidden text-ellipsis">
+                            {result.recommendation || 
+                              ((result.risk_level || result.risk) === 'High' ? 'Replace with post-quantum cryptography algorithm' : 
+                               (result.risk_level || result.risk) === 'Medium' ? 'Plan to upgrade to stronger cryptography' : 
+                               'Monitor for vulnerabilities')}
+                          </div>
                         </td>
                       </tr>
                     ))}
