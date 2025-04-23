@@ -474,13 +474,13 @@ const QuantumRiskAssessment = ({ findings }) => {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-100 dark:bg-gray-800">
                 <tr>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">File</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Line</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Risk</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Vulnerability</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Algorithm</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Description</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recommendation</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[25%] max-w-[25%]">File</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[7%]">Line</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[8%]">Risk</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[12%]">Vulnerability</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[10%]">Algorithm</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[19%]">Description</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-[19%]">Recommendation</th>
                 </tr>
               </thead>
               <tbody>
@@ -542,28 +542,38 @@ const QuantumRiskAssessment = ({ findings }) => {
 
                     return (
                       <tr key={rowKey} className="bg-white dark:bg-gray-900 even:bg-gray-50 dark:even:bg-gray-800">
-                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300 font-mono">
-                          {item.file || item.file_path || 'N/A'}
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300 font-mono w-[25%] max-w-[25%] truncate">
+                          <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+                            {item.file || item.file_path || 'N/A'}
+                          </div>
                         </td>
-                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300">
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300 w-[7%]">
                           {item.line || item.line_number || 'N/A'}
                         </td>
-                        <td className="px-3 py-4">
+                        <td className="px-3 py-4 w-[8%]">
                           <span className={`px-2 py-1 text-xs rounded ${riskClass}`}>
                             {item.risk || 'Unknown'}
                           </span>
                         </td>
-                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300">
-                          {item.vulnerability || item.type || item.vulnerability_type || 'Unknown'}
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300 w-[12%] truncate">
+                          <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+                            {item.vulnerability || item.type || item.vulnerability_type || 'Unknown'}
+                          </div>
                         </td>
-                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300">
-                          {item.algorithm || item.algorithm_name || 'Unknown'}
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300 w-[10%] truncate">
+                          <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+                            {item.algorithm || item.algorithm_name || 'Unknown'}
+                          </div>
                         </td>
-                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300">
-                          {description}
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300 w-[19%] truncate">
+                          <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+                            {description}
+                          </div>
                         </td>
-                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300">
-                          {recommendation}
+                        <td className="px-3 py-4 text-sm text-gray-700 dark:text-gray-300 w-[19%] truncate">
+                          <div className="overflow-hidden text-ellipsis whitespace-nowrap">
+                            {recommendation}
+                          </div>
                         </td>
                       </tr>
                     );
