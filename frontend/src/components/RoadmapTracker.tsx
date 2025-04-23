@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { FiLoader, FiPlus, FiAlertTriangle, FiAlertCircle, FiEdit, FiSave, FiX, FiCheck, FiTrash2 } from 'react-icons/fi';
+import { FiLoader, FiPlus, FiAlertTriangle, FiAlertCircle, FiEdit, FiSave, FiX, FiCheck, FiTrash2, FiMoon, FiSun } from 'react-icons/fi';
 
 interface RoadmapTask {
   id: string;
@@ -56,6 +56,25 @@ const RoadmapTracker: React.FC = () => {
   });
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const [darkMode, setDarkMode] = useState<boolean>(true);
+
+  // Initialize dark mode based on document state
+  useEffect(() => {
+    // Check if dark mode is already applied to the document
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    setDarkMode(isDarkMode);
+    
+    // If not in dark mode, add it (to ensure consistency with rest of the app)
+    if (!isDarkMode) {
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  // Toggle theme function
+  const toggleTheme = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle('dark');
+  };
 
   useEffect(() => {
     const fetchRoadmapData = async () => {
@@ -264,6 +283,13 @@ const RoadmapTracker: React.FC = () => {
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-200">Roadmap Tracker</h1>
         <div className="flex space-x-2">
+          <button
+            onClick={toggleTheme}
+            className="mr-2 p-2 rounded-full bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-yellow-400 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? <FiSun size={18} /> : <FiMoon size={18} />}
+          </button>
           <button 
             onClick={handleAddTask}
             className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
