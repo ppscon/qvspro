@@ -4,9 +4,38 @@ import tempfile
 import shutil
 import subprocess
 import json
+import platform
 from werkzeug.utils import secure_filename
 
 scan_bp = Blueprint('scan', __name__)
+
+def get_scanner_path():
+    """Get the appropriate scanner binary based on the platform"""
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    api_dir = os.path.dirname(current_dir)
+    project_dir = os.path.dirname(api_dir)
+    
+    # Check platform and use appropriate binary
+    if platform.system() == "Linux":
+        scanner_name = "qvs-pro-linux"
+    else:
+        scanner_name = "qvs-pro"
+    
+    scanner_path = os.path.join(project_dir, 'scanner', scanner_name)
+    print(f"Using scanner at: {scanner_path} for platform {platform.system()}")
+    
+    # If Linux binary doesn't exist but regular does, try to copy and make executable
+    if platform.system() == "Linux" and not os.path.exists(scanner_path):
+        original_scanner = os.path.join(project_dir, 'scanner', 'qvs-pro')
+        if os.path.exists(original_scanner):
+            try:
+                shutil.copy2(original_scanner, scanner_path)
+                os.chmod(scanner_path, 0o755)  # Make executable
+                print(f"Copied and made executable: {scanner_path}")
+            except Exception as e:
+                print(f"Error copying scanner: {str(e)}")
+    
+    return scanner_path
 
 @scan_bp.route('/', methods=['POST'])
 def scan_files():
@@ -26,14 +55,9 @@ def scan_files():
                 file.save(file_path)
                 scanned_files.append(file.filename)
         
-        # Get path to scanner executable - fix the path resolution
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        api_dir = os.path.dirname(current_dir)
-        project_dir = os.path.dirname(api_dir)
-        scanner_path = os.path.join(project_dir, 'scanner', 'qvs-pro')
+        # Get path to scanner executable using platform-aware function
+        scanner_path = get_scanner_path()
         
-        # Debug info
-        print(f"Using scanner at: {scanner_path}")
         if not os.path.exists(scanner_path):
             return jsonify({"error": f"Scanner executable not found at {scanner_path}"}), 500
         
@@ -92,7 +116,9 @@ def scan_demo():
     api_dir = os.path.dirname(current_dir)
     project_dir = os.path.dirname(api_dir)
     test_dir = os.path.join(project_dir, 'Data', 'qvs_sample_files')
-    scanner_path = os.path.join(project_dir, 'scanner', 'qvs-pro')
+    
+    # Use platform-aware scanner path
+    scanner_path = get_scanner_path()
 
     if not os.path.exists(scanner_path):
         return jsonify({"error": f"Scanner executable not found at {scanner_path}"}), 500
