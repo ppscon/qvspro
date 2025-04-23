@@ -18,7 +18,7 @@ QVS-Pro is designed to help organizations identify and migrate quantum-vulnerabl
 - **Frontend**: React with TypeScript
 - **Backend**: Python Flask API
 - **Database**: Supabase
-- **Deployment**: Vercel (Frontend) / Docker (API)
+- **Deployment**: Vercel (Frontend) / Render (API)
 
 ## Development Setup
 
@@ -33,6 +33,10 @@ QVS-Pro is designed to help organizations identify and migrate quantum-vulnerabl
 ```bash
 cd frontend
 npm install
+
+# Create a .env file with the following content:
+# REACT_APP_API_URL=http://localhost:5001
+
 npm run dev
 ```
 
@@ -41,28 +45,55 @@ npm run dev
 ```bash
 cd api
 pip install -r requirements.txt
+
+# You can set environment variables if needed:
+# export PORT=5001  # Default is 5001
+# export FLASK_DEBUG=1  # For development
+
 python app.py
 ```
 
-### Using Docker
+Note: The backend is configured to allow CORS requests from `http://localhost:3000` and `https://qvspro.app`. If you're running the frontend on a different URL, you'll need to add it to the allowed origins in `api/app.py`.
+
+### Alternative: Using Docker (Local Development)
+
+While the production backend is deployed on Render, you can also use Docker for local development:
 
 ```bash
 docker build -t qvs-pro-api .
-docker run -p 5000:5000 qvs-pro-api
+docker run -p 5001:5001 -e PORT=5001 qvs-pro-api
 ```
+
+Note: Make sure to set the correct port mapping and environment variables when running the Docker container.
 
 ## Deployment
 
-The application is configured for seamless deployment:
+The application is deployed and accessible at:
 
-1. **Frontend**: Automatically deployed through Vercel
-2. **API**: Deployed using Docker containers
+- **Frontend**: [https://qvspro.app](https://qvspro.app) (Deployed on Vercel)
+- **Backend API**: [https://qvspro.onrender.com](https://qvspro.onrender.com) (Deployed on Render)
+
+### Deployment Configuration
+
+#### Frontend (Vercel)
+- Set the `REACT_APP_API_URL` environment variable to point to the backend API URL
+- Configure `vercel.json` for build settings
+
+#### Backend (Render)
+- Uses Render's native Python environment with Gunicorn
+- Configured to use the `PORT` environment variable provided by Render
+- CORS configured to allow requests from the frontend domain
+- Go scanner binary is cross-compiled for Linux (GOOS=linux GOARCH=amd64)
 
 ## Documentation
 
 - [User Guide](https://docs.qvspro.app/manual)
 - [API Reference](https://docs.qvspro.app/api)
 - [Installation Guide](https://docs.qvspro.app/install)
+- [Deployment Guide](docs/DEPLOYMENT.md)
+- [Security Best Practices](docs/SECURITY.md)
+- [Maintenance Guide](docs/MAINTENANCE.md)
+- [Deployment Summary](docs/SUMMARY.md)
 
 ## License
 

@@ -1020,6 +1020,26 @@ h1, h2, h3, h4, h5, h6 {
   width: 20rem;
 }
 
+.w-\[10\%\] {
+  width: 10%;
+}
+
+.w-\[12\%\] {
+  width: 12%;
+}
+
+.w-\[20\%\] {
+  width: 20%;
+}
+
+.w-\[30\%\] {
+  width: 30%;
+}
+
+.w-\[8\%\] {
+  width: 8%;
+}
+
 .w-full {
   width: 100%;
 }
@@ -1054,6 +1074,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .max-w-7xl {
   max-width: 80rem;
+}
+
+.max-w-\[30\%\] {
+  max-width: 30%;
 }
 
 .max-w-lg {
@@ -1315,6 +1339,10 @@ h1, h2, h3, h4, h5, h6 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.text-ellipsis {
+  text-overflow: ellipsis;
 }
 
 .whitespace-nowrap {
