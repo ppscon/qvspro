@@ -1,0 +1,88 @@
+{
+  "categories": [
+    {
+      "id": "auth",
+      "title": "Authentication and User Management",
+      "description": "User authentication, roles, and access control",
+      "tasks": [
+        {
+          "id": "auth-1",
+          "title": "Supabase Authentication Integration",
+          "description": "Integrate Supabase for user management during limited pilot",
+          "category": "auth",
+          "priority": "High",
+          "status": "In Progress",
+          "phase": 1,
+          "notes": "Currently facing connection timeout issues"
+        },
+        {
+          "id": "auth-2",
+          "title": "Role-Based Access Control",
+          "description": "Implement admin, security analyst, and developer roles",
+          "category": "auth",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 2,
+          "notes": ""
+        },
+        {
+          "id": "auth-3",
+          "title": "Organization/Team-Based Permissions",
+          "description": "Set up organization structure with team permissions",
+          "category": "auth",
+          "priority": "Medium",
+          "status": "Not Started",
+          "phase": 3,
+          "notes": ""
+        },
+        {
+          "id": "auth-4",
+          "title": "User Activity Logging",
+          "description": "Implement audit trails for user actions",
+          "category": "auth",
+          "priority": "Low",
+          "status": "Not Started",
+          "phase": 3,
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "id": "scanner",
+      "title": "Source Code Scanner",
+      "description": "Core scanning functionality",
+      "tasks": [
+        {
+          "id": "scanner-1",
+          "title": "Multi-Language Support",
+          "description": "Add support for Java, Python, Go, C++, JavaScript",
+          "category": "scanner",
+          "priority": "High",
+          "status": "Complete",
+          "phase": 1,
+          "notes": "Successfully implemented basic scanning for multiple languages"
+        },
+        {
+          "id": "scanner-2",
+          "title": "Cryptographic API Detection",
+          "description": "Detect cryptographic API calls and libraries",
+          "category": "scanner",
+          "priority": "High",
+          "status": "Complete",
+          "phase": 1,
+          "notes": "Currently detects common crypto libraries and function calls"
+        },
+        {
+          "id": "scanner-3",
+          "title": "Key Size and Algorithm Parameters",
+          "description": "Identify key sizes and algorithm parameters",
+          "category": "scanner",
+          "priority": "Medium",
+          "status": "In Progress",
+          "phase": 2,
+          "notes": "Basic identification working, needs refinement"
+        }
+      ]
+    }
+  ]
+}
