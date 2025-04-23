@@ -65,7 +65,6 @@ const FilterIcon = ({ size = 18, className = '' }) => (
 );
 
 function safeCell(val) {
-  console.log('[safeCell] Input:', val, '(type:', typeof val, ')'); // Keep logging
   // Return value directly if it exists, otherwise return empty string
   if (val == null || val === undefined || val === '') {
     return '';
@@ -364,8 +363,7 @@ const QuantumRiskAssessment = ({ findings }) => {
   };
 
   // Log debug info at render time - useful for debugging
-  console.log('[Render Scope] filteredResults:', filteredResults);
-  console.log('Table data:', filteredResults);
+  // Remove debug logging
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-6">
@@ -492,7 +490,7 @@ const QuantumRiskAssessment = ({ findings }) => {
                   </tr>
                 ) : (
                   filteredResults.map((item, index) => { 
-                    console.log('[Table Map] Rendering row', index, ':', item);
+                    // Remove debug logging
                     const rowKey = `finding-${index}-${item.file || ''}-${item.line || ''}`;
                     
                     // Determine risk class
@@ -529,16 +527,7 @@ const QuantumRiskAssessment = ({ findings }) => {
                       }
                     }
 
-                    // For debugging
-                    console.log(`Row ${index}:`, {
-                      file: item.file || item.file_path || 'N/A', 
-                      line: item.line || item.line_number || 'N/A',
-                      risk: item.risk || 'Unknown',
-                      vulnerability: item.vulnerability || item.type || item.vulnerability_type || 'Unknown',
-                      algorithm: item.algorithm || item.algorithm_name || 'Unknown',
-                      description,
-                      recommendation
-                    });
+                    // Remove debug logging
 
                     return (
                       <tr key={rowKey} className="bg-white dark:bg-gray-900 even:bg-gray-50 dark:even:bg-gray-800">

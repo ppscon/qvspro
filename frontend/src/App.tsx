@@ -234,8 +234,19 @@ const ScannerApp: React.FC = () => {
         files.forEach(file => {
           formData.append('files[]', file);
         });
+      } else if (scanType === 'directory') {
+        // For directory scanning, append all files and add scan_type
+        formData.append('scan_type', 'directory');
+        
+        // Add directory info
+        formData.append('directory_name', directory || '');
+        
+        // Append all files from the directory
+        files.forEach(file => {
+          formData.append('files[]', file);
+        });
       } else {
-        // For directory scanning, which will be implemented in the backend
+        // For other scan types (future compatibility)
         formData.append('directory', directory || '');
       }
 
@@ -371,14 +382,29 @@ const ScannerApp: React.FC = () => {
     setStatusMessage('Saving scan results...');
     
     try {
+      let scanName = 'Scan';
+      let scanDescription = '';
+      
+      if (scanType === 'file') {
+        scanName = files.length > 0 ? files[0].name : 'File Scan';
+        scanDescription = `Scan of ${files.length} file(s)`;
+      } else if (scanType === 'directory') {
+        scanName = directory || 'Directory Scan';
+        scanDescription = `Directory scan of ${files.length} files in ${directory}`;
+      } else {
+        scanName = 'Network Scan';
+        scanDescription = 'Scan of network traffic';
+      }
+      
       const scanRecord = {
         user_id: user.id,
-        name: files.length > 0 ? files[0].name : 'Scan',
-        description: `Scan of ${files.length} file(s)`,
+        name: scanName,
+        description: scanDescription,
         scan_parameters: JSON.stringify({
           scanType,
           fileCount: files.length,
-          fileNames: files.map(f => f.name)
+          directory: directory,
+          fileNames: scanType !== 'network' ? files.map(f => f.name).slice(0, 10) : []
         }),
         status: 'completed',
         results: scanResults
@@ -571,12 +597,98 @@ const ScannerApp: React.FC = () => {
 
             {scanType === 'directory' && (
               <div
-                className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center cursor-not-allowed opacity-60 mb-6"
+                className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center cursor-pointer hover:border-primary dark:hover:border-primary mb-6"
+                onClick={() => document.getElementById('directoryInput')?.click()}
               >
+                <input
+                  id="directoryInput"
+                  type="file"
+                  // @ts-ignore - webkitdirectory is not in standard HTML attributes
+                  webkitdirectory="true"
+                  // @ts-ignore - directory is not in standard HTML attributes
+                  directory=""
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      // Create a virtual directory representation
+                      const directoryFiles = Array.from(e.target.files);
+                      setFiles(directoryFiles);
+                      
+                      // Extract directory name from the first file path
+                      // @ts-ignore - webkitRelativePath is not in standard File interface
+                      const firstPath = directoryFiles[0].webkitRelativePath;
+                      const dirName = firstPath.split('/')[0];
+                      setDirectory(dirName);
+                      
+                      setError(null);
+                      setStatusMessage(`Directory "${dirName}" selected with ${directoryFiles.length} files`);
+                      setScanResults(null);
+                    }
+                  }}
+                />
                 <FiFolder className="mx-auto mb-4 text-gray-400 dark:text-gray-600" size={32} />
                 <p className="text-gray-600 dark:text-gray-400 mb-2">
-                  Directory scanning coming soon!
+                  Click to select a directory to scan
                 </p>
+                <button
+                  type="button"
+                  className="mt-2 px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-dark"
+                >
+                  Select Directory
+                </button>
+              </div>
+            )}
+
+            {/* Show directory info if selected */}
+            {directory && files.length > 0 && (
+              <div className="mt-4 mb-6">
+                <h3 className="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Selected Directory:</h3>
+                <div className="border rounded-md p-4 bg-gray-50 dark:bg-gray-800">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center">
+                        <FiFolder className="text-primary mr-2" />
+                        <span className="font-medium text-gray-800 dark:text-gray-200">{directory}</span>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Contains {files.length} files
+                      </p>
+                      
+                      {/* File type distribution */}
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {Array.from(new Set(files.map(f => f.name.split('.').pop()?.toLowerCase() || '')))
+                          .filter(ext => ext)
+                          .slice(0, 5)
+                          .map((ext, i) => (
+                            <span key={i} className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-xs rounded">
+                              {ext.toUpperCase()}: {files.filter(f => f.name.endsWith(`.${ext}`)).length}
+                            </span>
+                          ))
+                        }
+                        {Array.from(new Set(files.map(f => f.name.split('.').pop()?.toLowerCase() || ''))).length > 5 && (
+                          <span className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-xs rounded">
+                            +{Array.from(new Set(files.map(f => f.name.split('.').pop()?.toLowerCase() || ''))).length - 5} more
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFiles([]);
+                        setDirectory(null);
+                        setScanResults(null);
+                        setStatusMessage('Ready to scan');
+                      }}
+                      className="p-2 text-gray-500 hover:text-red-500"
+                      title="Remove directory"
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -592,7 +704,7 @@ const ScannerApp: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleScan}
-                  disabled={isLoading || (scanType === 'file' && files.length === 0)}
+                  disabled={isLoading || (scanType === 'file' && files.length === 0) || (scanType === 'directory' && files.length === 0)}
                   className="flex-1 flex justify-center items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
