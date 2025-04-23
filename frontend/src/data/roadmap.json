@@ -215,9 +215,9 @@
           "description": "Generate comprehensive cryptographic inventory",
           "category": "cbom",
           "priority": "Medium",
-          "status": "Not Started",
+          "status": "In Progress",
           "phase": 2,
-          "notes": ""
+          "notes": "Enhanced data model and visualization implementation started"
         },
         {
           "id": "risk-1",
