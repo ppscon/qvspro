@@ -158,10 +158,14 @@ const CBOMViewer: React.FC<CBOMViewerProps> = ({
       
       {/* Filters and View Mode Selectors */}
       <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 mb-6">
-        <div className="flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Search Input */}
-          <div className="flex-grow">
+          <div className="md:col-span-2">
+            <label htmlFor="searchQuery" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Search
+            </label>
             <input
+              id="searchQuery"
               type="text"
               placeholder="Search assets by name, description, or file path..."
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md 
@@ -172,8 +176,12 @@ const CBOMViewer: React.FC<CBOMViewerProps> = ({
           </div>
           
           {/* Risk Level Filter */}
-          <div className="md:w-48">
+          <div>
+            <label htmlFor="riskFilter" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Risk Level
+            </label>
             <select
+              id="riskFilter"
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md
                        dark:bg-gray-700 dark:text-white"
               value={filterRisk}
@@ -190,8 +198,12 @@ const CBOMViewer: React.FC<CBOMViewerProps> = ({
           </div>
           
           {/* Component Filter */}
-          <div className="md:w-48">
+          <div>
+            <label htmlFor="componentFilter" className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Component
+            </label>
             <select
+              id="componentFilter"
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md
                        dark:bg-gray-700 dark:text-white"
               value={activeComponent || ''}
@@ -207,31 +219,36 @@ const CBOMViewer: React.FC<CBOMViewerProps> = ({
           </div>
           
           {/* View Mode Selector */}
-          <div className="flex space-x-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-md">
-            <button
-              className={`px-3 py-1 rounded-md text-sm ${viewMode === 'summary' 
-                ? 'bg-blue-500 text-white' 
-                : 'text-gray-600 dark:text-gray-300'}`}
-              onClick={() => setViewMode('summary')}
-            >
-              Summary
-            </button>
-            <button
-              className={`px-3 py-1 rounded-md text-sm ${viewMode === 'cards' 
-                ? 'bg-blue-500 text-white' 
-                : 'text-gray-600 dark:text-gray-300'}`}
-              onClick={() => setViewMode('cards')}
-            >
-              Cards
-            </button>
-            <button
-              className={`px-3 py-1 rounded-md text-sm ${viewMode === 'table' 
-                ? 'bg-blue-500 text-white' 
-                : 'text-gray-600 dark:text-gray-300'}`}
-              onClick={() => setViewMode('table')}
-            >
-              Table
-            </button>
+          <div className="flex flex-col justify-end">
+            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+              View Mode
+            </label>
+            <div className="flex space-x-1 bg-gray-100 dark:bg-gray-700 p-1 rounded-md">
+              <button
+                className={`flex-1 px-3 py-1 rounded-md text-sm ${viewMode === 'summary' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                onClick={() => setViewMode('summary')}
+              >
+                Summary
+              </button>
+              <button
+                className={`flex-1 px-3 py-1 rounded-md text-sm ${viewMode === 'cards' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                onClick={() => setViewMode('cards')}
+              >
+                Cards
+              </button>
+              <button
+                className={`flex-1 px-3 py-1 rounded-md text-sm ${viewMode === 'table' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'}`}
+                onClick={() => setViewMode('table')}
+              >
+                Table
+              </button>
+            </div>
           </div>
         </div>
       </div>
