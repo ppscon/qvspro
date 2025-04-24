@@ -25,7 +25,8 @@ const VexStatusChart: React.FC<VexStatusChartProps> = ({ cbomData }) => {
         affected: 0,
         fixed: 0,
         under_investigation: 0,
-        no_vex_data: 0
+        no_vex_data: 0,
+        total: 0  // Add total property to ensure consistent shape
       };
     }
     
@@ -43,7 +44,7 @@ const VexStatusChart: React.FC<VexStatusChartProps> = ({ cbomData }) => {
         totalAssets++;
         
         if (asset.vex_status) {
-          counts[asset.vex_status]++;
+          counts[asset.vex_status as keyof typeof counts]++;
         } else {
           counts.no_vex_data++;
         }
@@ -57,7 +58,7 @@ const VexStatusChart: React.FC<VexStatusChartProps> = ({ cbomData }) => {
   }, [cbomData]);
   
   // Color scheme for VEX statuses
-  const vexStatusColors = {
+  const vexStatusColors: Record<string, string> = {
     not_affected: '#10b981', // green
     affected: '#ef4444',     // red
     fixed: '#3b82f6',        // blue
