@@ -160,15 +160,27 @@ const VexStatusChart: React.FC<VexStatusChartProps> = ({ cbomData }) => {
   if (!hasVexData) {
     return (
       <div className="flex flex-col h-full justify-center items-center text-center p-6">
-        <div className="text-gray-400 dark:text-gray-500 mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <h3 className="text-lg font-medium text-gray-100 mb-4">Vulnerability Exploitability</h3>
+        <div className="text-gray-400 dark:text-gray-500 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No VEX Data Available</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          No vulnerability exploitability context is available for this CBOM.
+        <h3 className="text-base font-medium text-gray-300">No VEX Data Available</h3>
+        <p className="text-sm text-gray-500 mt-2 max-w-xs">
+          Vulnerability exploitability context not available for this CBOM.
         </p>
+        <div className="mt-4 pt-4 border-t border-gray-700 w-full">
+          <button 
+            className="text-sm text-blue-400 hover:text-blue-300 flex items-center mx-auto"
+            onClick={() => window.open('https://www.cisa.gov/sites/default/files/2023-04/VEX-FAQ-508c.pdf', '_blank')}
+          >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Learn about VEX documents
+          </button>
+        </div>
       </div>
     );
   }

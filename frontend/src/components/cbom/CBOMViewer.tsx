@@ -382,14 +382,14 @@ const pdfExportButton = (
       
       {/* Summary View */}
       {viewMode === 'summary' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          <div className="bg-gray-800 shadow rounded-lg p-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <div className="bg-gray-800 shadow rounded-lg p-6">
             <div className="flex-1 min-w-[300px]">
               <RiskPieChart cbomData={enhancedCbom} />
             </div>
           </div>
           
-          <div className="bg-gray-800 shadow rounded-lg p-6 mb-6">
+          <div className="bg-gray-800 shadow rounded-lg p-6">
             <div className="flex-1 min-w-[300px]">
               <VulnTypeBarChart cbomData={enhancedCbom} />
             </div>
@@ -403,7 +403,7 @@ const pdfExportButton = (
           
           {/* Add VEX Status Chart */}
           <div className="bg-gray-800 shadow rounded-lg p-6">
-            <div className="flex-1 min-w-[300px]">
+            <div className="flex-1 min-w-[300px] min-h-[300px]">
               <VexStatusChart cbomData={enhancedCbom} />
             </div>
           </div>
