@@ -1,12 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { VexDocument } from '../../types/vex';
 import { CBOMInventory, CryptographicAsset } from '../../types/cbom';
+import VexInfoPanel from './VexInfoPanel';
 
 interface VexStatusChartProps {
   cbomData: CBOMInventory;
 }
 
 const VexStatusChart: React.FC<VexStatusChartProps> = ({ cbomData }) => {
+  const [showInfoPanel, setShowInfoPanel] = useState<boolean>(false);
+
   // Check if VEX data is available
   const hasVexData = useMemo(() => {
     if (!cbomData || !cbomData.components) return false;
@@ -187,7 +190,19 @@ const VexStatusChart: React.FC<VexStatusChartProps> = ({ cbomData }) => {
   
   return (
     <div className="flex flex-col items-center">
-      <h3 className="text-lg font-medium text-gray-100 mb-4">Vulnerability Exploitability</h3>
+      <div className="flex justify-between items-center w-full mb-4">
+        <h3 className="text-lg font-medium text-gray-100">Vulnerability Exploitability</h3>
+        <button
+          onClick={() => setShowInfoPanel(true)}
+          className="text-blue-400 hover:text-blue-300 flex items-center text-sm"
+          aria-label="Learn about VEX"
+        >
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          What is VEX?
+        </button>
+      </div>
       
       <div className="relative" aria-hidden="true">
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -250,6 +265,15 @@ const VexStatusChart: React.FC<VexStatusChartProps> = ({ cbomData }) => {
           </div>
         ))}
       </div>
+      
+      {/* Modal for VEX info panel */}
+      {showInfoPanel && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="w-full max-w-4xl">
+            <VexInfoPanel onClose={() => setShowInfoPanel(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
