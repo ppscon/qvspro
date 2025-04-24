@@ -10,42 +10,58 @@ export const mockVexDocuments: VexDocument[] = [
   {
     id: 'vex-1',
     vulnerability_id: 'QVS-2025-001',
-    asset_id: 'asset-123',
-    status: 'not_affected',
-    justification: 'vulnerable_code_not_in_execute_path',
-    status_notes: 'The vulnerable code exists but is not in the execution path for this deployment.',
+    asset_id: 'asset-1', // JWT Signing (RSA)
+    status: 'affected',
+    impact: 'high',
+    impact_statement: 'This RSA implementation is vulnerable to Shor\'s algorithm when quantum computers reach sufficient scale.',
+    remediation_plan: 'Migrate to a post-quantum signature algorithm like Dilithium or Falcon.',
+    remediation_deadline: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(), // 180 days from now
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    created_by: 'QVS Security Team'
   },
   {
     id: 'vex-2',
     vulnerability_id: 'QVS-2025-002',
-    asset_id: 'asset-456',
-    status: 'affected',
-    impact: 'medium',
-    impact_statement: 'This vulnerability could potentially allow an attacker to access encrypted data if they have quantum computing resources.',
-    remediation_plan: 'Upgrade to a post-quantum cryptographic algorithm in the next release.',
-    remediation_deadline: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 days from now
+    asset_id: 'asset-2', // Password Hashing (bcrypt)
+    status: 'not_affected',
+    justification: 'vulnerable_code_cannot_be_controlled_by_adversary',
+    status_notes: 'While bcrypt is theoretically vulnerable to Grover\'s algorithm, the implementation uses high work factors that mitigate the practical risk.',
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    created_by: 'QVS Security Team'
   },
   {
     id: 'vex-3',
     vulnerability_id: 'QVS-2025-003',
-    asset_id: 'asset-789',
-    status: 'fixed',
-    status_notes: 'This vulnerability was fixed in version 2.0.0 by upgrading the cryptographic library.',
+    asset_id: 'asset-6', // TLS Connection (ECDSA)
+    status: 'under_investigation',
+    status_notes: 'We are investigating whether the current implementation of ECDSA in TLS 1.3 is effectively vulnerable in our specific deployment context.',
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    created_by: 'QVS Research Team'
   },
   {
     id: 'vex-4',
     vulnerability_id: 'QVS-2025-004',
-    asset_id: 'asset-101112',
-    status: 'under_investigation',
-    status_notes: 'We are currently investigating the potential impact of this vulnerability.',
+    asset_id: 'asset-4', // Database Encryption (AES-128)
+    status: 'fixed',
+    status_notes: 'This asset has been upgraded to use AES-256 with proper key rotation policies.',
     created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
+    created_by: 'QVS Security Team'
+  },
+  {
+    id: 'vex-5',
+    vulnerability_id: 'QVS-2025-005',
+    asset_id: 'asset-7', // API Request Signing (ECDSA)
+    status: 'affected',
+    impact: 'medium',
+    impact_statement: 'The ECDSA P-256 implementation could be vulnerable to quantum attacks, but requires significant quantum resources not expected to be available soon.',
+    remediation_plan: 'Plan to replace with a hybrid quantum-resistant signature scheme in the next major release.',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    created_by: 'QVS Security Team'
   }
 ];
 
@@ -61,6 +77,8 @@ export const fetchVexDocuments = async (cbomId: string): Promise<VexCollection> 
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 500));
   
+  // For the mock CBOM, always return our mock VEX documents
+  // In a real implementation, this would filter based on the CBOM ID
   return {
     cbom_id: cbomId,
     documents: mockVexDocuments,

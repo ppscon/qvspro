@@ -213,24 +213,25 @@ const VexStatusChart: React.FC<VexStatusChartProps> = ({ cbomData }) => {
           {/* Center text showing affected percentage */}
           <text
             x={centerX}
-            y={centerY}
+            y={centerY - 5}
             textAnchor="middle"
             dominantBaseline="middle"
             fill="#ffffff"
-            fontSize="24px"
+            fontSize="28px"
             fontWeight="bold"
           >
             {pieChartData.find(data => data.status === 'affected')?.percentage || 0}%
           </text>
           <text
             x={centerX}
-            y={centerY + 20}
+            y={centerY + 22}
             textAnchor="middle"
             dominantBaseline="middle"
-            fill="#ffffff"
-            fontSize="12px"
+            fill="#ef4444"
+            fontSize="14px"
+            fontWeight="bold"
           >
-            Affected
+            AFFECTED
           </text>
         </svg>
       </div>

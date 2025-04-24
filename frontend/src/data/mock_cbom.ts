@@ -7,6 +7,7 @@ export const mockCBOMData: CBOMInventory = {
   name: "QVS-Pro Demo Project",
   description: "Demo CBOM for development purposes",
   total_assets: 15,
+  id: "mock-cbom-1",
   components: [
     {
       id: "comp-1",
