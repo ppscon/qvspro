@@ -4,6 +4,7 @@
  * These types define the structure for a comprehensive inventory of
  * cryptographic assets within an organization or system.
  */
+import { VexDocument, VexStatus } from './vex';
 
 // Risk level enumeration
 export type RiskLevel = 'Critical' | 'High' | 'Medium' | 'Low' | 'None' | 'Unknown';
@@ -54,6 +55,9 @@ export interface CryptographicAsset {
   metadata?: Record<string, any>; // Additional metadata
   implementation_context?: string[]; // Added to match usage in cbomConverter
   recommendation?: string; // Added to match usage in cbomConverter
+  // VEX-related fields
+  vex_status?: VexStatus;
+  vex_document_id?: string; // Reference to a VEX document if available
 }
 
 // Component containing cryptographic assets
@@ -100,6 +104,9 @@ export interface CBOMInventory {
   vulnerability_summary: VulnerabilitySummary;
   graph?: AssetGraph; // Optional graph representation for visualization
   id?: string; // Added to match usage in mock_cbom
+  // VEX-related fields
+  vex_documents?: VexDocument[]; // Associated VEX documents
+  vex_last_updated?: string; // When VEX data was last updated
 }
 
 // Graph representation for asset relationships
@@ -116,6 +123,7 @@ export interface AssetNode {
   risk_level: RiskLevel;
   component_id: string;
   component?: string; // Added to match usage in createAssetGraph
+  vex_status?: VexStatus; // VEX status for visualization
 }
 
 export interface AssetEdge {
