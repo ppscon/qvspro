@@ -7,7 +7,9 @@ const Footer: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-center items-center">
           <Link to="/" className="flex items-center mr-4">
-            <img src="/images/logo-qvs.png" alt="QVS-Pro Logo" className="logo-qvs-footer" />
+            <>
+              <img src="/images/logo-qvs.png" alt="QVS-Pro Logo" className="logo-qvs-footer" />
+            </>
           </Link>
           <div className="text-sm text-gray-400">
             <p className="inline-block">

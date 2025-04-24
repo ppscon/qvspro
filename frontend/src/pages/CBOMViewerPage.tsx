@@ -41,28 +41,30 @@ const CBOMViewerPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <Link to="/app" className="text-blue-600 hover:text-blue-800 flex items-center">
-          <FiArrowLeft className="mr-2" />
-          Back to Scanner
-        </Link>
+    <div className="dark bg-gray-900 min-h-screen">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-6">
+          <Link to="/app" className="text-blue-400 hover:text-blue-300 flex items-center">
+            <FiArrowLeft className="mr-2" />
+            Back to Scanner
+          </Link>
+        </div>
+        
+        <h1 className="text-3xl font-bold mb-6 text-white">Cryptographic Bill of Materials</h1>
+        
+        <div className="bg-gray-800 shadow-sm rounded-lg p-4 mb-6">
+          <p className="text-gray-300">
+            The Cryptographic Bill of Materials (CBOM) provides a detailed inventory of all cryptographic assets 
+            across your codebase, highlighting assets that are vulnerable to quantum attacks.
+          </p>
+        </div>
+      
+        <CBOMViewer 
+          cbomData={cbomData} 
+          isLoading={isLoading} 
+          error={error} 
+        />
       </div>
-      
-      <h1 className="text-3xl font-bold mb-6">Cryptographic Bill of Materials</h1>
-      
-      <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-4 mb-6">
-        <p className="text-gray-600 dark:text-gray-300">
-          The Cryptographic Bill of Materials (CBOM) provides a detailed inventory of all cryptographic assets 
-          across your codebase, highlighting assets that are vulnerable to quantum attacks.
-        </p>
-      </div>
-      
-      <CBOMViewer 
-        cbomData={cbomData} 
-        isLoading={isLoading} 
-        error={error} 
-      />
     </div>
   );
 };

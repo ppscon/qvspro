@@ -20,8 +20,10 @@ const Login: React.FC = () => {
       <div className="relative z-10 container mx-auto px-4">
         <div className="py-8">
           <Link to="/" className="inline-flex items-center text-blue-400 hover:text-blue-300">
-            <FiArrowLeft className="mr-2" /> Back to Home
-          </Link>
+  <>
+    <FiArrowLeft className="mr-2" /> Back to Home
+  </>
+</Link>
         </div>
         
         <div className="py-8">

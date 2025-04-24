@@ -1,0 +1,62 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# General Code Style & Formatting
+
+- Use functional components and hooks in React; avoid class components.
+- Implement modular architecture to separate scanner, API, and UI concerns.
+- Use descriptive variable names that reflect domain concepts (e.g., scanResults, vulnerability
+- Structure frontend files: main component export, hooks, utility functions, types.
+- Follow a consistent code organization pattern in both frontend (React) and backend (Flask) co
+
+# Naming Conventions
+
+- Use kebab-case for component files (e.g., vulnerability-details.tsx).
+- Use snake_case for Python backend files (e.g., scan_routes.py).
+- Use camelCase for JavaScript/TypeScript variables and functions.
+- Favor named exports for React components and utilities.
+
+# TypeScript Best Practices
+
+- Use TypeScript for all frontend code; leverage interfaces for component props and data models
+- Create type definitions for API responses and CBOM data structures.
+- Avoid using any type; define explicit interfaces for scanner results and vulnerability data.
+- Enable strict TypeScript checking to catch potential issues early.
+
+# Syntax & Formatting
+
+- Use ESLint and Prettier for consistent code formatting across the codebase.
+- Prefer arrow functions for component definitions and callbacks.
+- Use async/await for handling asynchronous operations like API calls.
+- Implement proper error handling with try/catch blocks for scanner operations.
+
+# API & Backend
+
+- Follow RESTful principles for API endpoint design.
+- Use proper HTTP status codes and consistent JSON response structures.
+- Implement platform-aware code when dealing with scanner executables.
+- Document API endpoints with clear descriptions of parameters and responses.
+
+# UI & Frontend
+
+- Build responsive layouts using CSS Grid and Flexbox.
+- Implement data visualization components for CBOM and vulnerability reports.
+- Use a consistent color scheme that emphasizes security status (safe/warning/critical).
+- Ensure proper loading states and error handling in the UI for scan operations.
+- Implement accessible UI components with proper ARIA attributes and keyboard navigation.
+
+# Security Practices
+
+- Follow secure coding practices, especially for handling file uploads and scan operations.
+- Validate all user inputs and sanitize file paths before processing.
+- Implement proper authentication for API endpoints as needed.
+- Follow the principle of least privilege when executing scanner operations.
+
+# Testing & Quality
+
+- Write unit tests for critical scanner and API functionality.
+- Implement integration tests for the full scanning workflow.
+- Test scanner operations across different platforms (Linux, macOS).
+- Validate scan results against known vulnerability patterns.

@@ -13,13 +13,15 @@ interface EducationCardProps {
 const EducationCard: React.FC<EducationCardProps> = ({ title, description, icon, path }) => {
   return (
     <Link to={path} className="block">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-transform duration-300 hover:transform hover:scale-105">
-        <div className="flex items-center justify-center w-14 h-14 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full mb-4">
-          {icon}
+      <>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-transform duration-300 hover:transform hover:scale-105">
+          <div className="flex items-center justify-center w-14 h-14 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full mb-4">
+            {icon}
+          </div>
+          <h3 className="text-xl font-semibold mb-2">{title}</h3>
+          <p className="text-gray-600 dark:text-gray-400">{description}</p>
         </div>
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-gray-600 dark:text-gray-400">{description}</p>
-      </div>
+      </>
     </Link>
   );
 };

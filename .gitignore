@@ -135,6 +135,8 @@ Thumbs.db
 
 # Local Development & Environment Specific
 start.sh
+.windsurfrules
+.cursorrules
 *.log
 .qvs-pids
 qvs-pro.iml

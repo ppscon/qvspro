@@ -193,7 +193,9 @@ const QuantumQuiz: React.FC = () => {
                 to="/education"
                 className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white rounded-md flex items-center"
               >
-                <FiHome className="mr-2" /> Back to Education Hub
+                <>
+                  <FiHome className="mr-2" /> Back to Education Hub
+                </>
               </Link>
             </div>
           </div>

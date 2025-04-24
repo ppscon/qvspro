@@ -94,53 +94,61 @@ const Dashboard: React.FC = () => {
         {/* Quick Links */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Link to="/app" className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full mr-4">
-                <FiShield className="text-blue-600 dark:text-blue-400" size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">New Scan</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Start a new vulnerability scan</p>
-              </div>
-            </div>
-          </Link>
+  <>
+    <div className="flex items-center">
+      <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full mr-4">
+        <FiShield className="text-blue-600 dark:text-blue-400" size={24} />
+      </div>
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">New Scan</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Start a new vulnerability scan</p>
+      </div>
+    </div>
+  </>
+</Link>
           
           <Link to="/profile" className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-            <div className="flex items-center">
-              <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full mr-4">
-                <FiUser className="text-green-600 dark:text-green-400" size={24} />
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Profile</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Manage your profile</p>
-              </div>
-            </div>
-          </Link>
+  <>
+    <div className="flex items-center">
+      <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full mr-4">
+        <FiUser className="text-green-600 dark:text-green-400" size={24} />
+      </div>
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Profile</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Manage your profile</p>
+      </div>
+    </div>
+  </>
+</Link>
           
           {isAdmin ? (
             <Link to="/admin" className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center">
-                <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full mr-4">
-                  <FiUserPlus className="text-purple-600 dark:text-purple-400" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Admin Dashboard</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Manage beta users and permissions</p>
-                </div>
-              </div>
-            </Link>
+  <>
+    <div className="flex items-center">
+      <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full mr-4">
+        <FiUserPlus className="text-purple-600 dark:text-purple-400" size={24} />
+      </div>
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Admin Dashboard</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Manage beta users and permissions</p>
+      </div>
+    </div>
+  </>
+</Link>
           ) : (
             <Link to="/settings" className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center">
-                <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full mr-4">
-                  <FiSettings className="text-purple-600 dark:text-purple-400" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Settings</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Configure your preferences</p>
-                </div>
-              </div>
-            </Link>
+  <>
+    <div className="flex items-center">
+      <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full mr-4">
+        <FiSettings className="text-purple-600 dark:text-purple-400" size={24} />
+      </div>
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Settings</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Configure your preferences</p>
+      </div>
+    </div>
+  </>
+</Link>
           )}
         </div>
 
@@ -179,7 +187,9 @@ const Dashboard: React.FC = () => {
                 to="/app" 
                 className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
               >
-                <FiPlus className="mr-1" /> New Scan
+                <>
+                  <FiPlus className="mr-1" /> New Scan
+                </>
               </Link>
             </div>
           </div>
