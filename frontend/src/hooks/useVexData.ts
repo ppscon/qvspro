@@ -15,16 +15,23 @@ export const useVexData = (cbomData: CBOMInventory | null) => {
   const [isLoadingVex, setIsLoadingVex] = useState<boolean>(false);
   const [vexError, setVexError] = useState<string | null>(null);
 
+  // Update enhancedCbom when cbomData changes
+  useEffect(() => {
+    setEnhancedCbom(cbomData);
+  }, [cbomData]);
+
   // Load VEX data when CBOM data changes
   useEffect(() => {
-    if (!cbomData || !cbomData.id) return;
+    if (!cbomData) return;
     
     const loadVexData = async () => {
       setIsLoadingVex(true);
       setVexError(null);
       
       try {
-        const vexData = await fetchVexDocuments(cbomData.id || 'unknown');
+        // Use cbomData.id if available, or generate a unique identifier
+        const cbomId = cbomData.id || `mock-cbom-${Date.now()}`;
+        const vexData = await fetchVexDocuments(cbomId);
         setVexDocuments(vexData.documents);
         
         // Enhance CBOM with VEX data
