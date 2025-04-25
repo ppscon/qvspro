@@ -251,6 +251,7 @@ export const mockCBOMData: CBOMInventory = {
     shors: 3,
     grovers: 5,
     quantum_resistant: 3,
+    none: 0,
     unknown: 4
   },
   graph: {
@@ -310,6 +311,7 @@ export const generateRandomCBOM = (
     shors: 0,
     grovers: 0,
     quantum_resistant: 0,
+    none: 0,
     unknown: 0
   };
   

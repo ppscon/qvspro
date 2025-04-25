@@ -8,7 +8,7 @@ import ShorsAlgorithmDemo from './components/ShorsAlgorithmDemo';
 import QubitVisualization from './components/QubitVisualization';
 import PostQuantumCryptography from './components/PostQuantumCryptography';
 import GroversAlgorithm from './components/GroversAlgorithm';
-import QuantumGlossary from './components/QuantumGlossary';
+import QuantumExplorer from './components/QuantumExplorer';
 import SignOutButton from './components/SignOutButton';
 import QuantumQuiz from './components/QuantumQuiz';
 import RoadmapTracker from './components/RoadmapTracker';
@@ -947,7 +947,7 @@ const App: React.FC = () => {
         <Route path="/education/qubits" component={QubitVisualization} />
         <Route path="/education/post-quantum" component={PostQuantumCryptography} />
         <Route path="/education/grovers-algorithm" component={GroversAlgorithm} />
-        <Route path="/education/glossary" component={QuantumGlossary} />
+        <Route path="/education/glossary" component={QuantumExplorer} />
         <Route path="/education/quiz" component={QuantumQuiz} />
         <ProtectedRoute path="/internal/roadmap">
           <RoadmapTracker />

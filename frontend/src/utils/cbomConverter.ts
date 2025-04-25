@@ -328,6 +328,135 @@ export const exportCBOMAsCSV = (cbom: CBOMInventory, filename: string = 'cbom_ex
 };
 
 /**
+ * Export CBOM as XLSX file with multiple sheets (detailed format)
+ * Requires xlsx library: npm install xlsx
+ */
+export const exportCBOMAsXLSX = async (cbom: CBOMInventory, filename: string = 'cbom_export.xlsx'): Promise<void> => {
+  try {
+    // Define process.browser manually before importing xlsx
+    if (typeof window !== 'undefined') {
+      window.process = window.process || {};
+      (window.process as any).browser = true;
+    }
+    
+    // Import XLSX with type assertion
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const XLSX = (await import('xlsx/dist/xlsx.full.min.js')) as any;
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new();
+  
+    // Summary sheet
+    const summaryData = [
+      ['CBOM Summary Report', ''],
+      ['Generated At', new Date(cbom.generated_at).toLocaleString()],
+      ['Total Components', cbom.components.length.toString()],
+      ['Total Assets', cbom.total_assets.toString()],
+      [''],
+      ['Risk Summary', ''],
+      ['Critical', cbom.risk_summary.critical.toString()],
+      ['High', cbom.risk_summary.high.toString()],
+      ['Medium', cbom.risk_summary.medium.toString()],
+      ['Low', cbom.risk_summary.low.toString()],
+      ['None', cbom.risk_summary.none.toString()],
+      ['Unknown', cbom.risk_summary.unknown.toString()],
+      [''],
+      ['Vulnerability Summary', ''],
+      ["Shor's Algorithm", cbom.vulnerability_summary.shors.toString()],
+      ["Grover's Algorithm", cbom.vulnerability_summary.grovers.toString()],
+      ['Quantum-Resistant', cbom.vulnerability_summary.quantum_resistant.toString()],
+      ['None', cbom.vulnerability_summary.none.toString()],
+      ['Unknown', cbom.vulnerability_summary.unknown.toString()],
+    ];
+    
+    const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
+    XLSX.utils.book_append_sheet(wb, summarySheet, 'Summary');
+    
+    // Components sheet
+    const componentsHeaders = ['Component Name', 'Type', 'Description', 'Version', 'Asset Count'];
+    const componentsData = cbom.components.map(component => [
+      component.name,
+      component.type,
+      component.description,
+      component.version,
+      component.assets.length.toString()
+    ]);
+    
+    const componentsSheet = XLSX.utils.aoa_to_sheet([componentsHeaders, ...componentsData]);
+    XLSX.utils.book_append_sheet(wb, componentsSheet, 'Components');
+    
+    // Assets sheet (all assets in a flat structure)
+    const assetsHeaders = [
+      'Component', 'Asset', 'Type', 'File Path', 'Line Number', 
+      'Vulnerability', 'Risk', 'Context', 'Description', 'Recommendation'
+    ];
+    
+    const assetsData: string[][] = [];
+    cbom.components.forEach(component => {
+      component.assets.forEach(asset => {
+        assetsData.push([
+          component.name,
+          asset.name,
+          asset.type,
+          asset.file_path || 'N/A',
+          asset.line_number?.toString() || 'N/A',
+          asset.vulnerability_type,
+          asset.risk_level,
+          asset.implementation_context?.join(', ') || 'Unknown',
+          asset.description || 'N/A',
+          asset.recommendation || 'N/A',
+        ]);
+      });
+    });
+    
+    const assetsSheet = XLSX.utils.aoa_to_sheet([assetsHeaders, ...assetsData]);
+    XLSX.utils.book_append_sheet(wb, assetsSheet, 'Assets');
+    
+    // Create individual sheets for Critical and High risk assets for quick reference
+    const criticalAssetsData = [assetsHeaders];
+    const highRiskAssetsData = [assetsHeaders];
+    
+    cbom.components.forEach(component => {
+      component.assets.forEach(asset => {
+        const assetRow = [
+          component.name,
+          asset.name,
+          asset.type,
+          asset.file_path || 'N/A',
+          asset.line_number?.toString() || 'N/A',
+          asset.vulnerability_type,
+          asset.risk_level,
+          asset.implementation_context?.join(', ') || 'Unknown',
+          asset.description || 'N/A',
+          asset.recommendation || 'N/A',
+        ];
+        
+        if (asset.risk_level === 'Critical') {
+          criticalAssetsData.push(assetRow);
+        } else if (asset.risk_level === 'High') {
+          highRiskAssetsData.push(assetRow);
+        }
+      });
+    });
+    
+    if (criticalAssetsData.length > 1) {
+      const criticalSheet = XLSX.utils.aoa_to_sheet(criticalAssetsData);
+      XLSX.utils.book_append_sheet(wb, criticalSheet, 'Critical Assets');
+    }
+    
+    if (highRiskAssetsData.length > 1) {
+      const highRiskSheet = XLSX.utils.aoa_to_sheet(highRiskAssetsData);
+      XLSX.utils.book_append_sheet(wb, highRiskSheet, 'High Risk Assets');
+    }
+    
+    // Generate and download the XLSX file
+    XLSX.writeFile(wb, filename);
+  } catch (error) {
+    console.error('Error exporting CBOM as XLSX:', error);
+  }
+};
+
+/**
  * Helper to make CSV fields safe
  */
 const safeCSVField = (value: any): string => {

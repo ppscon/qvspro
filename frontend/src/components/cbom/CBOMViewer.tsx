@@ -9,7 +9,8 @@ import VulnTypeBarChart from './VulnTypeBarChart';
 import AssetTypeBarChart from './AssetTypeBarChart';
 import { 
   exportCBOMAsJSON, 
-  exportCBOMAsCSV 
+  exportCBOMAsCSV,
+  exportCBOMAsXLSX
 } from '../../utils/cbomConverter';
 import { generateQVSReportHtml } from '../../utils/qvsReportFormatUtils';
 import { exportQvsToPdf } from '../../utils/qvsBasicExportUtils';
@@ -17,6 +18,9 @@ import VexStatusBadge from './VexStatusBadge';
 import VexDetailPanel from './VexDetailPanel';
 import useVexData from '../../hooks/useVexData';
 import VexStatusChart from './VexStatusChart';
+import CBOMReportPDF from './CBOMReportPDF';
+import { FiDownload, FiFileText, FiFilter, FiList, FiGrid, FiPieChart, FiChevronDown, FiShield } from 'react-icons/fi';
+import Modal from 'react-modal';
 
 // Unified color system for consistent visualization across all elements
 const RISK_COLORS: Record<RiskLevel, { main: string, gradient: string, tailwind: string }> = {
@@ -91,11 +95,13 @@ const CBOMViewer: React.FC<CBOMViewerProps> = ({
   error = null 
 }) => {
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'table' | 'cards' | 'summary'>('summary');
+  const [viewMode, setViewMode] = useState<'summary' | 'cards' | 'table'>('summary');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRisk, setFilterRisk] = useState<RiskLevel | 'All'>('All');
   const [filterVexStatus, setFilterVexStatus] = useState<string>('All');
   const [showVexModal, setShowVexModal] = useState<boolean>(false);
+  const [showReportModal, setShowReportModal] = useState<boolean>(false);
+  const [showExportDropdown, setShowExportDropdown] = useState<boolean>(false);
   
   // Use the VEX data hook
   const {
@@ -117,6 +123,17 @@ const CBOMViewer: React.FC<CBOMViewerProps> = ({
   const handleExportCSV = useCallback(() => {
     if (enhancedCbom) {
       exportCBOMAsCSV(enhancedCbom, `cbom_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    }
+  }, [enhancedCbom]);
+  
+  const handleExportXLSX = useCallback(async () => {
+    if (enhancedCbom) {
+      try {
+        await exportCBOMAsXLSX(enhancedCbom, `cbom_export_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      } catch (error) {
+        console.error('Error exporting XLSX:', error);
+        // You could add a toast notification here
+      }
     }
   }, [enhancedCbom]);
   
@@ -193,47 +210,15 @@ const CBOMViewer: React.FC<CBOMViewerProps> = ({
     };
   }, [enhancedCbom]);
 
-  // Example scan metadata (replace with real data as needed)
-  const scanMeta = {
-    date: new Date().toLocaleDateString(),
-    scanId: enhancedCbom?.id || 'N/A',
+  // Replace handleQvsExportPdf with handleGeneratePDFReport
+  const handleGeneratePDFReport = () => {
+    setShowReportModal(true);
   };
-
-  // Optionally, allow user to customize recipient/audience in the future
-  const recipient = undefined;
-
-  // QVS PDF Export Button
-const handleQvsExportPdf = useCallback(() => {
-  if (!enhancedCbom) return;
-  // Basic HTML summary (replace with your real summary logic)
-  const summaryHtml = `
-    <div class="summary-card">
-      <h2>CBOM Summary</h2>
-      <ul>
-        <li><strong>Total Components:</strong> ${summaryStats?.totalComponents ?? 'N/A'}</li>
-        <li><strong>Total Assets:</strong> ${summaryStats?.totalAssets ?? 'N/A'}</li>
-        <li><strong>Critical Findings:</strong> ${summaryStats?.criticalPercentage ?? 0}%</li>
-        <li><strong>High Findings:</strong> ${summaryStats?.highPercentage ?? 0}%</li>
-      </ul>
-    </div>
-  `;
-  const html = generateQVSReportHtml(summaryHtml, {
-    title: 'QVS CBOM Summary Report',
-    assessmentDate: enhancedCbom.generated_at,
-    username: 'QVS Security',
-    darkMode: false
-  });
-  exportQvsToPdf(html, { title: 'QVS_CBOM_Summary_Report' });
-}, [enhancedCbom, summaryStats]);
-
-const pdfExportButton = (
-  <button
-    onClick={handleQvsExportPdf}
-    className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-md text-sm"
-  >
-    Export PDF Summary
-  </button>
-);
+  
+  // Close PDF report modal
+  const handleCloseReportModal = () => {
+    setShowReportModal(false);
+  };
 
   // Display VEX modal if a document is selected
   useEffect(() => {
@@ -279,21 +264,74 @@ const pdfExportButton = (
           </p>
         </div>
         
-        <div className="flex space-x-2 mt-4 md:mt-0 items-center">
-  <button
-    onClick={handleExportJSON}
-    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md text-sm"
-  >
-    Export JSON
-  </button>
-  <button
-    onClick={handleExportCSV}
-    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md text-sm"
-  >
-    Export CSV
-  </button>
-  {pdfExportButton}
-</div>
+        {/* Action buttons for reports and exports */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded-md font-medium flex items-center hover:bg-blue-700"
+            onClick={() => setShowReportModal(true)}
+            disabled={!enhancedCbom}
+          >
+            <FiFileText className="mr-2" /> Generate Report
+          </button>
+          
+          <div className="relative inline-block text-left group">
+            <button
+              className="px-4 py-2 bg-gray-700 text-white rounded-md font-medium flex items-center hover:bg-gray-600"
+              onClick={() => setShowExportDropdown(!showExportDropdown)}
+              disabled={!enhancedCbom}
+            >
+              <FiDownload className="mr-2" /> Export <FiChevronDown className="ml-1" />
+            </button>
+            
+            {showExportDropdown && (
+              <div 
+                className="absolute left-0 mt-1 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5 z-20"
+                onMouseLeave={() => setShowExportDropdown(false)}
+              >
+                <div className="py-1" role="menu" aria-orientation="vertical">
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                    onClick={() => {
+                      handleExportJSON();
+                      setShowExportDropdown(false);
+                    }}
+                    disabled={!enhancedCbom}
+                  >
+                    Export as JSON
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                    onClick={() => {
+                      handleExportCSV();
+                      setShowExportDropdown(false);
+                    }}
+                    disabled={!enhancedCbom}
+                  >
+                    Export as CSV
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+                    onClick={() => {
+                      handleExportXLSX();
+                      setShowExportDropdown(false);
+                    }}
+                    disabled={!enhancedCbom}
+                  >
+                    Export as Excel (XLSX)
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <button
+            className="px-4 py-2 bg-gray-700 text-white rounded-md font-medium flex items-center hover:bg-gray-600"
+            onClick={() => setShowVexModal(true)}
+            disabled={!enhancedCbom}
+          >
+            <FiShield className="mr-2" /> VEX Status
+          </button>
+        </div>
       </div>
       
       {/* Filters */}
@@ -364,18 +402,41 @@ const pdfExportButton = (
             </select>
           </div>
           
+          {/* View Mode Buttons instead of dropdown */}
           <div>
-            <label htmlFor="view-mode" className="block text-sm font-medium text-gray-300">View Mode</label>
-            <select
-              id="view-mode"
-              className="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value as 'table' | 'cards' | 'summary')}
-            >
-              <option value="summary">Summary</option>
-              <option value="cards">Card View</option>
-              <option value="table">Table View</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-300 mb-1">View Mode</label>
+            <div className="flex bg-gray-700 rounded-md overflow-hidden">
+              <button
+                className={`px-4 py-2 text-sm ${
+                  viewMode === 'summary'
+                    ? 'bg-blue-600 text-white font-medium'
+                    : 'text-gray-300 hover:bg-gray-600'
+                }`}
+                onClick={() => setViewMode('summary')}
+              >
+                Summary
+              </button>
+              <button
+                className={`px-4 py-2 text-sm ${
+                  viewMode === 'cards'
+                    ? 'bg-blue-600 text-white font-medium'
+                    : 'text-gray-300 hover:bg-gray-600'
+                }`}
+                onClick={() => setViewMode('cards')}
+              >
+                Cards
+              </button>
+              <button
+                className={`px-4 py-2 text-sm ${
+                  viewMode === 'table'
+                    ? 'bg-blue-600 text-white font-medium'
+                    : 'text-gray-300 hover:bg-gray-600'
+                }`}
+                onClick={() => setViewMode('table')}
+              >
+                Table
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -513,6 +574,25 @@ const pdfExportButton = (
             />
           </div>
         </div>
+      )}
+
+      {/* PDF Report Generation Modal */}
+      {showReportModal && (
+        <Modal
+          isOpen={showReportModal}
+          onRequestClose={handleCloseReportModal}
+          contentLabel="CBOM Report"
+          className="fixed inset-0 overflow-y-auto p-4 flex items-center justify-center"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        >
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col">
+            <CBOMReportPDF 
+              cbomData={enhancedCbom} 
+              summaryStats={summaryStats} 
+              onClose={handleCloseReportModal} 
+            />
+          </div>
+        </Modal>
       )}
     </div>
   );

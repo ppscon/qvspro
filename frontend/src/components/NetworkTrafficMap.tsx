@@ -262,7 +262,7 @@ const NetworkTrafficMap: React.FC<NetworkTrafficMapProps> = ({ scanResults, dark
     setDragStart({ x: e.clientX, y: e.clientY });
     
     // Check if clicked on a node
-    let clickedNode = null;
+    let clickedNode: Node | null = null;
     for (const node of nodes) {
       const nodePos = { x: 0, y: 0 }; // Need actual position from layout
       const dx = x - nodePos.x;
@@ -279,7 +279,7 @@ const NetworkTrafficMap: React.FC<NetworkTrafficMapProps> = ({ scanResults, dark
     
     // Check if clicked on a connection
     if (!clickedNode) {
-      let clickedConnection = null;
+      let clickedConnection: Connection | null = null;
       for (const connection of connections) {
         const sourcePos = { x: 0, y: 0 }; // Need actual position from layout
         const targetPos = { x: 0, y: 0 }; // Need actual position from layout

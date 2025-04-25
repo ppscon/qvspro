@@ -18,6 +18,21 @@ import {
 import EducationHeader from "./EducationHeader";
 import EducationFooter from "./EducationFooter";
 
+// Add interfaces for data types
+interface CountData {
+  name: string;
+  count: number;
+}
+
+interface SimulationResult {
+  counts_data: CountData[];
+  phase: string;
+  period: number;
+  gcd1: number;
+  gcd2: number;
+  factors: number[];
+}
+
 const ShorsAlgorithmDemo: React.FC = () => {
   const [step, setStep] = useState(1);
   const [N, setN] = useState(15);
@@ -62,23 +77,30 @@ const ShorsAlgorithmDemo: React.FC = () => {
     }
   };
 
-  // Simple simulation function
-  const simulateShorsAlgorithm = (N: number, a: number) => {
-    // Determine period (simplified)
-    let r = 0;
-    let found = false;
+  // Simulate Shor's algorithm
+  const simulateShorsAlgorithm = (N: number, a: number): SimulationResult => {
+    // Determine period (in real quantum computer, this is done with quantum phase estimation)
+    // For this simulation, we'll use a simplified approach
+    let r = 1;
+    let foundPeriod = false;
+    
+    // Simple period finding (real Shor's uses quantum computation)
     for (let i = 1; i <= N; i++) {
-      if (Math.pow(a, i) % N === 1) {
+      const val = Math.pow(a, i) % N;
+      if (val === 1) {
         r = i;
-        found = true;
+        foundPeriod = true;
         break;
       }
     }
-
-    if (!found) r = 4; // Fallback
-
+    
+    // Default if no period found
+    if (!foundPeriod) {
+      r = 4; // Just use a reasonable default for demonstration
+    }
+    
     // Generate simulated measurement probabilities
-    const countsData = [];
+    const countsData: CountData[] = [];
     const phaseValue = (1 / r).toFixed(4);
 
     // Create visual representation of measurement
@@ -98,7 +120,7 @@ const ShorsAlgorithmDemo: React.FC = () => {
     }
 
     // Calculate factors based on period
-    let factors = [];
+    let factors: number[] = [];
     if (r % 2 === 0) {
       const gcd1 = gcd(Math.pow(a, r / 2) - 1, N);
       const gcd2 = gcd(Math.pow(a, r / 2) + 1, N);

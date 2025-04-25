@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiHelpCircle, FiSun, FiMoon } from 'react-icons/fi';
 import SignOutButton from './SignOutButton';
+import QvsLogo from './ui/QvsLogo';
 
 interface HeaderProps {
   darkMode?: boolean;
@@ -15,7 +16,7 @@ const Header: React.FC<HeaderProps> = ({ darkMode = false, toggleTheme, toggleHe
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center">
           <Link to="/">
-            <img src="/images/logo-qvs.png" alt="QVS-Pro Logo" className="logo-qvs" />
+            <QvsLogo className="logo-qvs" alt="QVS-Pro Logo" />
           </Link>
         </div>
 

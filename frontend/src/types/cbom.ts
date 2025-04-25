@@ -55,6 +55,7 @@ export interface CryptographicAsset {
   metadata?: Record<string, any>; // Additional metadata
   implementation_context?: string[]; // Added to match usage in cbomConverter
   recommendation?: string; // Added to match usage in cbomConverter
+  algorithm?: string; // Algorithm name/identifier for searching
   // VEX-related fields
   vex_status?: VexStatus;
   vex_document_id?: string; // Reference to a VEX document if available
@@ -89,6 +90,7 @@ export interface VulnerabilitySummary {
   shors: number;
   grovers: number;
   quantum_resistant: number;
+  none: number;
   unknown: number;
 }
 
