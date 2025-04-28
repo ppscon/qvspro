@@ -57,6 +57,14 @@ export const Profile: React.FC = () => {
 
       if (error) throw error;
 
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: { profile_name: profile.username }
+      });
+
+      if (metadataError) {
+        console.error('Error updating user metadata:', metadataError);
+      }
+
       setMessage({
         text: 'Profile updated successfully!',
         type: 'success',
@@ -94,22 +102,6 @@ export const Profile: React.FC = () => {
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="profile_name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Profile Name
-              </label>
-              <div className="mt-1">
-                <input
-                  id="profile_name"
-                  name="profile_name"
-                  type="text"
-                  value={profile.profile_name || ''}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                />
-              </div>
-            </div>
-
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Username

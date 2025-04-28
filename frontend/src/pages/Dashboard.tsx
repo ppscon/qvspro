@@ -84,7 +84,7 @@ const Dashboard: React.FC = () => {
         {/* Welcome Section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome, {profile?.profile_name || profile?.full_name || profile?.username || user?.email?.split('@')[0]}!
+            Welcome, {profile?.username || profile?.full_name || user?.email?.split('@')[0] || 'User'}!
           </h2>
           <p className="text-gray-600 dark:text-gray-300">
             Manage your quantum vulnerability scans and access your profile information.

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiSun, FiMoon, FiSearch, FiUpload, FiFile, FiFolder, FiTrash2, FiAlertTriangle, FiCheckCircle, FiWifi, FiHelpCircle } from 'react-icons/fi';
+import { FiSun, FiMoon, FiSearch, FiUpload, FiFile, FiFolder, FiTrash2, FiAlertTriangle, FiCheckCircle, FiWifi, FiHelpCircle, FiUser } from 'react-icons/fi';
 import { BrowserRouter as Router, Switch, Route, Link, Redirect, useHistory } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import QuantumRiskAssessment from './components/QuantumRiskAssessment';
@@ -15,6 +15,7 @@ import RoadmapTracker from './components/RoadmapTracker';
 import NetworkTrafficAnalyzer from './components/NetworkTrafficAnalyzer';
 import Login from './pages/Login';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { AdminRoute } from './components/auth/AdminRoute';
 import Dashboard from './pages/Dashboard';
 import ScanView from './pages/ScanView';
 import Profile from './pages/Profile';
@@ -38,7 +39,7 @@ const ScannerApp: React.FC = () => {
   const [scanResults, setScanResults] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string>('Ready to scan');
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const history = useHistory();
   const [helpVisible, setHelpVisible] = useState<boolean>(false);
 
@@ -464,6 +465,9 @@ const ScannerApp: React.FC = () => {
             >
               <FiHelpCircle className="mr-1" /> Help
             </button>
+            <div className="flex items-center text-white hover:text-gray-300 mr-2">
+              <FiUser className="mr-1" /> {user ? (profile?.username || user.email?.split('@')[0] || 'User') : 'User'}
+            </div>
             <SignOutButton className="nav-link" />
             <button
               type="button"
@@ -936,9 +940,9 @@ const App: React.FC = () => {
         <ProtectedRoute path="/profile">
           <Profile />
         </ProtectedRoute>
-        <ProtectedRoute path="/admin">
+        <AdminRoute path="/admin">
           <AdminDashboard />
-        </ProtectedRoute>
+        </AdminRoute>
         <ProtectedRoute path="/cbom">
           <CBOMViewerPage />
         </ProtectedRoute>

@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiHelpCircle, FiSun, FiMoon } from 'react-icons/fi';
+import { FiHelpCircle, FiSun, FiMoon, FiUser } from 'react-icons/fi';
 import SignOutButton from './SignOutButton';
 import QvsLogo from './ui/QvsLogo';
+import { useAuth } from '../hooks/useAuth';
 
 interface HeaderProps {
   darkMode?: boolean;
@@ -11,6 +12,9 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ darkMode = false, toggleTheme, toggleHelp }) => {
+  const { getDisplayName } = useAuth();
+  const displayName = getDisplayName();
+
   return (
     <header className="bg-gray-800 text-white shadow">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -36,6 +40,10 @@ const Header: React.FC<HeaderProps> = ({ darkMode = false, toggleTheme, toggleHe
               <FiHelpCircle className="mr-1" /> Help
             </button>
           )}
+          
+          <div className="flex items-center text-white hover:text-gray-300 mr-2">
+            <FiUser className="mr-1" /> {displayName}
+          </div>
           
           <SignOutButton className="text-white hover:text-gray-300" />
           

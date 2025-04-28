@@ -2,6 +2,7 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '../lib/supabase';
 import { Session, User } from '@supabase/supabase-js';
 import { UserCredentials, UserProfile } from '../types';
+import { ensureUserProfile, checkUserApproval } from './useProfileHelper';
 
 interface AuthContextType {
   session: Session | null;
@@ -9,6 +10,8 @@ interface AuthContextType {
   profile: UserProfile | null;
   loading: boolean;
   isAdmin: boolean;
+  isApproved: boolean;
+  getDisplayName: () => string;
   signUp: (credentials: UserCredentials) => Promise<{ error: any | null; data: any }>;
   signIn: (credentials: UserCredentials) => Promise<{ error: any | null; data: any }>;
   signOut: () => Promise<void>;
@@ -22,6 +25,8 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   isAdmin: false,
+  isApproved: false,
+  getDisplayName: () => 'User',
   signUp: async () => ({ error: null, data: null }),
   signIn: async () => ({ error: null, data: null }),
   signOut: async () => {},
@@ -35,6 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
 
   useEffect(() => {
     // Get initial session
@@ -44,6 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         fetchProfile(session.user.id);
         checkAdminStatus(session.user.id);
+        checkApprovalStatus(session.user.id);
       }
       setLoading(false);
     });
@@ -55,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (session?.user) {
         fetchProfile(session.user.id);
         checkAdminStatus(session.user.id);
+        checkApprovalStatus(session.user.id);
       }
       setLoading(false);
     });
@@ -77,21 +85,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error fetching profile:', error);
         // If profile doesn't exist, create it
         if (error.code === 'PGRST116') {
-          try {
-            // Create a new profile with the user ID
-            const { data: newData, error: createError } = await supabase
+          // Get user's email from auth
+          const { data: userData } = await supabase.auth.getUser();
+          const email = userData?.user?.email;
+          
+          // Create profile using our helper
+          const profileCreated = await ensureUserProfile(
+            userId, 
+            email || undefined,
+            userData?.user?.user_metadata?.profile_name
+          );
+          
+          if (profileCreated) {
+            // Re-fetch the profile
+            const { data: newData } = await supabase
               .from('profiles')
-              .insert({ id: userId })
-              .select()
+              .select('*')
+              .eq('id', userId)
               .single();
-
-            if (createError) {
-              console.error('Error creating profile:', createError);
-            } else if (newData) {
+              
+            if (newData) {
               setProfile(newData);
             }
-          } catch (createErr) {
-            console.error('Error in profile creation process:', createErr);
           }
         }
       } else if (data) {
@@ -125,9 +140,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Check if the user is approved
+  const checkApprovalStatus = async (userId: string) => {
+    // Use our helper function
+    const isUserApproved = await checkUserApproval(userId);
+    setIsApproved(isUserApproved);
+    
+    // If admin, automatically approve
+    if (isAdmin) {
+      setIsApproved(true);
+    }
+  };
+
   // Sign up a new user
   const signUp = async ({ email, password, profile_name }: UserCredentials) => {
     try {
+      // First, sign up the user with Supabase auth
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -138,22 +166,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
 
-      // Create profile when user signs up
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{ 
-            id: data.user.id,
-            profile_name,
-            username: profile_name // Set username to profile_name initially for backward compatibility
-          }]);
+      if (error) {
+        console.error('Error signing up:', error);
+        return { data: null, error };
+      }
 
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
+      // Only try to create profile if user was created successfully
+      if (data.user) {
+        try {
+          // Use our helper function
+          await ensureUserProfile(data.user.id, email, profile_name);
+        } catch (profileErr) {
+          console.error('Exception in profile creation:', profileErr);
+          // Don't fail the signup if profile creation throws an exception
         }
       }
 
-      return { data, error };
+      return { data, error: null };
     } catch (error) {
       console.error('Sign up error:', error);
       return { data: null, error };
@@ -195,12 +224,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Add a helper method to get a consistent display name
+  const getDisplayName = () => {
+    if (!user) return 'User';
+    
+    // Priority order: profile.username, user.user_metadata.profile_name, email username
+    return profile?.username || user.user_metadata?.profile_name || user.email?.split('@')[0] || 'User';
+  };
+
   const value = {
     session,
     user,
     profile,
     loading,
     isAdmin,
+    isApproved,
+    getDisplayName,
     signUp,
     signIn,
     signOut,

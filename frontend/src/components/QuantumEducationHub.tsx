@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCpu, FiActivity, FiLock, FiKey, FiFileText, FiSun, FiMoon, FiAward } from 'react-icons/fi';
+import { FiCpu, FiActivity, FiLock, FiKey, FiFileText, FiSun, FiMoon, FiAward, FiUser } from 'react-icons/fi';
 import EducationFooter from './EducationFooter';
+import { useAuth } from '../hooks/useAuth';
+import SignOutButton from './SignOutButton';
 
 interface EducationCardProps {
   title: string;
@@ -28,6 +30,8 @@ const EducationCard: React.FC<EducationCardProps> = ({ title, description, icon,
 
 const QuantumEducationHub: React.FC = () => {
   const [darkMode, setDarkMode] = useState(true);
+  const { user, profile } = useAuth();
+  const displayName = profile?.username || user?.email?.split('@')[0] || 'User';
 
   // Initialize theme based on user preference
   useEffect(() => {
@@ -54,9 +58,16 @@ const QuantumEducationHub: React.FC = () => {
             </div>
             
             <div className="flex items-center space-x-4">
+              <Link to="/dashboard" className="nav-link">
+                Dashboard
+              </Link>
               <Link to="/app" className="nav-link">
                 Scanner
               </Link>
+              <div className="flex items-center text-gray-600 dark:text-gray-300 mr-2">
+                <FiUser className="mr-1" /> {displayName}
+              </div>
+              <SignOutButton className="nav-link" />
               <button
                 type="button"
                 onClick={toggleTheme}

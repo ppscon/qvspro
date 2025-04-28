@@ -1,20 +1,18 @@
 import React, { ReactNode } from 'react';
-import { Route, Redirect, RouteProps, RouteComponentProps } from 'react-router-dom';
+import { Route, Redirect, RouteProps, RouteComponentProps, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 
-interface ProtectedRouteProps extends Omit<RouteProps, 'render'> {
+interface AdminRouteProps extends Omit<RouteProps, 'render'> {
   redirectTo?: string;
-  requiresApproval?: boolean;
   children: ReactNode;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+export const AdminRoute: React.FC<AdminRouteProps> = ({ 
   children, 
-  redirectTo = '/login', 
-  requiresApproval = true,
+  redirectTo = '/dashboard',
   ...rest 
 }) => {
-  const { user, loading, isAdmin, isApproved } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
 
   if (loading) {
     // Return loading indicator while auth state is being determined
@@ -25,17 +23,17 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Create a pending approval page component
-  const PendingApprovalPage = () => (
+  // Create an access denied component
+  const AccessDeniedPage = () => (
     <div className="min-h-screen bg-gray-900 flex flex-col items-center justify-center text-white p-4">
       <div className="bg-gray-800 p-8 rounded-lg shadow-lg max-w-md w-full text-center">
-        <h1 className="text-2xl font-bold mb-4">Waiting for Approval</h1>
+        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
         <p className="mb-6">
-          Your account is pending admin approval. You'll receive an email once your account has been approved.
+          You don't have permission to access the admin dashboard.
         </p>
-        <p className="text-gray-400 text-sm">
-          If you have any questions, please contact support.
-        </p>
+        <Link to="/dashboard" className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700">
+          Return to Dashboard
+        </Link>
       </div>
     </div>
   );
@@ -49,19 +47,19 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           return (
             <Redirect
               to={{
-                pathname: redirectTo,
+                pathname: '/login',
                 state: { from: props.location }
               }}
             />
           );
         }
         
-        // If requiresApproval is true and user is not approved and not an admin
-        if (requiresApproval && !isApproved && !isAdmin) {
-          return <PendingApprovalPage />;
+        // If not admin, show access denied
+        if (!isAdmin) {
+          return <AccessDeniedPage />;
         }
         
-        // Otherwise, render the protected content
+        // Otherwise, render the admin content
         return children;
       }}
     />

@@ -1,6 +1,6 @@
 {
   "name": "qvs-pro-frontend",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
     "@react-pdf/renderer": "2.3.0",

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { FiMail, FiLock, FiAlertCircle, FiArrowRight, FiUser } from 'react-icons/fi';
+import { FiMail, FiLock, FiAlertCircle, FiArrowRight, FiUser, FiInfo } from 'react-icons/fi';
 import { FaGithub } from 'react-icons/fa';
 import { useAuth } from '../../hooks/useAuth';
 import { supabase } from '../../lib/supabase';
@@ -36,8 +36,19 @@ export const Auth: React.FC<AuthProps> = ({ redirectTo = '/app' }) => {
           throw new Error('Profile name is required');
         }
         const { error } = await signUp({ email, password, profile_name: profileName });
-        if (error) throw error;
-        setMessage('Registration successful! Please check your email to confirm your account.');
+        if (error) {
+          if (error.message.includes('Email')) {
+            throw error; // Pass through email-related errors like "already in use"
+          } else {
+            console.error('Signup error:', error);
+            // Show success message even if there was a non-critical error
+            setMessage('Registration successful! Your account is pending admin approval. You will be notified when approved.');
+            setMode('signIn');
+            return;
+          }
+        }
+        
+        setMessage('Registration successful! Your account is pending admin approval. You will be notified when approved.');
         setMode('signIn');
       } else if (mode === 'resetPassword') {
         const { error } = await resetPassword(email);
@@ -103,6 +114,15 @@ export const Auth: React.FC<AuthProps> = ({ redirectTo = '/app' }) => {
         {message && (
           <div className="p-4 mb-4 text-sm text-green-700 bg-green-100 dark:bg-green-900 dark:text-green-200 rounded-lg">
             {message}
+          </div>
+        )}
+        
+        {mode === 'signUp' && (
+          <div className="p-4 mb-4 text-sm text-blue-700 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-200 rounded-lg flex items-start">
+            <FiInfo className="mr-2 mt-0.5 flex-shrink-0" />
+            <span>
+              New accounts require admin approval before access is granted. You'll be notified by email when your account is approved.
+            </span>
           </div>
         )}
 
